@@ -71,6 +71,22 @@ public class PlayerController : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        rb.linearVelocity = new Vector3(inputWalk.normalized.x * currentSpeed, -1, inputWalk.normalized.y * currentSpeed);  
+        Vector3 movement = new Vector3(
+            inputWalk.normalized.x,
+            0,
+            inputWalk.normalized.y
+        );
+
+        rb.linearVelocity = new Vector3(
+            movement.x * currentSpeed,
+            -1,
+            movement.z * currentSpeed
+        );
+
+        // Hace que el frente del personaje (eje Z) mire hacia donde se mueve
+        if (movement != Vector3.zero)
+        {
+            transform.forward = movement;
+        }
     }
 }
