@@ -1,6 +1,5 @@
-using Unity.VisualScripting;
-using Unity.VisualScripting.InputSystem;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -20,13 +19,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float staminaRecovery = 1.5f;
     [SerializeField] float timeStoppedRunning = 0f;
     [SerializeField] float recoveryDelay = 0.7f;
+    [SerializeField] private float rotationSpeed = 15f; // Rotación suave
     private bool staminaDepleted = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         playerInput = GetComponent<PlayerInput>();
-        anim = GetComponent<Animator>(); // <-- Mantenido en el mismo objeto tal como lo tienes
+        anim = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -83,13 +83,15 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        Vector3 moveDirection = new Vector3(inputWalk.x, 0f, inputWalk.y).normalized;
+        Vector3 targetVelocity = moveDirection * (inputWalk.magnitude > 0.01f ? currentSpeed : 0f);
         rb.linearVelocity = new Vector3(inputWalk.normalized.x * currentSpeed, -1, inputWalk.normalized.y * currentSpeed);
 
-        // --- ÚNICO AGREGADO: Gira el personaje hacia la dirección del movimiento ---
-        if (inputWalk.sqrMagnitude > 0.01f)
+        // Gira el personaje hacia la dirección del movimiento ---
+        if (moveDirection.sqrMagnitude > 0.01f)
         {
-            Vector3 moveDirection = new Vector3(inputWalk.x, 0f, inputWalk.y);
-            transform.rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+            Quaternion targetRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime));
         }
     }
 }
