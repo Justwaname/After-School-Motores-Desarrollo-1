@@ -1,17 +1,16 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class SphereCastInteractor : MonoBehaviour
 {
     [Header("Interaction Settings")]
-    public float interactRadius = 0.5f;
-    public float interactDistance = 0f;
-
-    // LayerMask para comprobar Tags para físicas
-    public LayerMask interactableLayer;
-
+    [SerializeField] private float interactRadius = 0.5f; 
+    [SerializeField] private float interactDistance = 2f; 
+    [SerializeField] private LayerMask interactableLayer;
+    [SerializeField] private TextMeshProUGUI interactText;
     private PlayerInput playerInput;
-
+    private InteractableObject currentInteractable;
     private void Start()
     {
         playerInput = GetComponent<PlayerInput>();
@@ -24,42 +23,63 @@ public class SphereCastInteractor : MonoBehaviour
 
     private void Update()
     {
-        if (playerInput.actions["Interact"].WasPressedThisFrame())
-        {   
-            Debug.Log("E presionada");
-            TryInteract();
+        // 1. Buscamos en cada frame si hay un interactuable
+        CheckForInteractable();
+
+        // 2. Si se presiona el botón de interacción y hay un objeto válido
+        if (playerInput.actions["Interact"].WasPressedThisFrame() && currentInteractable != null)
+        {
+            currentInteractable.Interact();
+
+            // Ocultamos la UI tras interactuar (útil si el objeto es destruido)
+            if (interactText != null)
+            {
+                interactText.gameObject.SetActive(false);
+            }
         }
     }
 
-    private void TryInteract()
+    private void CheckForInteractable()
     {
         Vector3 origin = transform.position;
         Vector3 direction = transform.forward;
-        RaycastHit hitInfo;
+        Collider hitCollider = null;
 
-        // SphereCast buscando solo en la capa de interactuables
-        bool hasHit = Physics.SphereCast(origin, interactRadius, direction, out hitInfo, interactDistance, interactableLayer);
+        // OverlapSphere para detectar dentro del origen
+        Collider[] overlappingColliders = Physics.OverlapSphere(origin, interactRadius, interactableLayer);
 
-        if (hasHit)
+        if (overlappingColliders.Length > 0)
         {
-            // Script de interacción del objeto golpeado
-            InteractableObject interactable = hitInfo.collider.GetComponent<InteractableObject>();
+            hitCollider = overlappingColliders[0];
+        }
+        else if (Physics.SphereCast(origin, interactRadius, direction, out RaycastHit hitInfo, interactDistance, interactableLayer))
+        {
+            hitCollider = hitInfo.collider;
+        }
+
+        if (hitCollider != null)
+        {
+            InteractableObject interactable = hitCollider.GetComponent<InteractableObject>();
 
             if (interactable != null)
             {
-                Debug.Log("SUCCESS: Interactable object found -> " + hitInfo.collider.gameObject.name);
+                currentInteractable = interactable;
 
-                // Ejecutamos la función de interacción
-                interactable.Interact();
-            }
-            else
-            {
-                Debug.Log("INFO: Object found, but it does not have an InteractableObject component.");
+                // Actualizamos y mostramos el TextMeshPro
+                if (interactText != null)
+                {
+                    interactText.text = currentInteractable.GetInteractText();
+                    interactText.gameObject.SetActive(true);
+                }
+                return;
             }
         }
-        else
+
+        // Si no hay nada al alcance, reseteamos la referencia y ocultamos la UI
+        currentInteractable = null;
+        if (interactText != null)
         {
-            Debug.Log("MISS: No interactable objects in range.");
+            interactText.gameObject.SetActive(false);
         }
     }
 
