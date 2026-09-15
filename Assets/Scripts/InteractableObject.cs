@@ -1,11 +1,11 @@
 using UnityEngine;
 
-public class InteractableObject : MonoBehaviour
+public abstract class InteractableObject : MonoBehaviour
 {
-    //Función que se  ejecuta cuando el jugador interactua con el objeto
-    public void Interact()
+    public abstract void Interact();
+
+    public virtual string GetInteractText()
     {
-        // si anda el scrip
-        Debug.Log(" se interactua con el item.");
+        return gameObject.name + " interact";
     }
 }
