@@ -6,7 +6,8 @@ public class ExitDoor : InteractableObject
     {
         if (GameManager.Instance.CanEscape())
         {
-            GameManager.Instance.ShowNotification("You escaped!");
+            Destroy(gameObject);
+            GameManager.Instance.ShowNotification("Door opened!");
         }
         else
         {

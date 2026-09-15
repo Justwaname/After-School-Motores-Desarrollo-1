@@ -3,8 +3,8 @@ using UnityEngine;
 public class ItemSpawner : MonoBehaviour
 {
     [Header("Configuración de Spawns")]
-    [SerializeField] private GameObject keyItemPrefab; // Arrastra el prefab de la esfera aquí
-    [SerializeField] private Transform[] spawnPoints;   // Arrastra los 3 SpawnPoints aquí
+    [SerializeField] private GameObject keyItemPrefab;
+    [SerializeField] private string spawnPointTag = "SpawnPoint";   
 
     void Start()
     {
@@ -13,13 +13,36 @@ public class ItemSpawner : MonoBehaviour
 
     void SpawnItems()
     {
-        if (keyItemPrefab == null || spawnPoints == null) return;
+        if (keyItemPrefab == null || spawnPointTag == null) return;
 
-        foreach (Transform spawnPoint in spawnPoints)
+        GameObject[] spawnObjects = GameObject.FindGameObjectsWithTag(spawnPointTag);
+
+        if (spawnObjects.Length == 0)
+        {
+            Debug.LogWarning($"[ItemSpawner] No se encontraron objetos con el Tag '{spawnPointTag}' en la escena.");
+            return;
+        }
+
+        foreach (GameObject spawnPoint in spawnObjects)
         {
             if (spawnPoint != null)
             {
-                Instantiate(keyItemPrefab, spawnPoint.position, spawnPoint.rotation);
+                Instantiate(keyItemPrefab, spawnPoint.transform.position, spawnPoint.transform.rotation);
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+
+        GameObject[] spawnObjects = GameObject.FindGameObjectsWithTag(spawnPointTag);
+
+        foreach (GameObject spawnPoint in spawnObjects)
+        {
+            if (spawnPoint != null)
+            {
+                Gizmos.DrawSphere(spawnPoint.transform.position, 0.4f);
             }
         }
     }
