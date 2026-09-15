@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody rb;
     private PlayerInput playerInput;
+    private Animator anim; // <-- Referencia al Animator
     private Vector2 inputWalk;
     private float inputSprint;
 
@@ -20,11 +21,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float timeStoppedRunning = 0f;
     [SerializeField] float recoveryDelay = 0.7f;
     private bool staminaDepleted = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         playerInput = GetComponent<PlayerInput>();
+        anim = GetComponent<Animator>(); // <-- Mantenido en el mismo objeto tal como lo tienes
     }
+
     void Update()
     {
         inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
@@ -68,9 +72,24 @@ public class PlayerController : MonoBehaviour
             stamina = maxStamina;
             staminaDepleted = false;
         }
+
+        // --- LÓGICA DEL ANIMATOR ---
+        if (anim != null)
+        {
+            float animationSpeed = inputWalk.magnitude * (currentSpeed / walkSpeed);
+            anim.SetFloat("Speed", animationSpeed);
+        }
     }
+
     private void FixedUpdate()
     {
-        rb.linearVelocity = new Vector3(inputWalk.normalized.x * currentSpeed, -1, inputWalk.normalized.y * currentSpeed);  
+        rb.linearVelocity = new Vector3(inputWalk.normalized.x * currentSpeed, -1, inputWalk.normalized.y * currentSpeed);
+
+        // --- ÚNICO AGREGADO: Gira el personaje hacia la dirección del movimiento ---
+        if (inputWalk.sqrMagnitude > 0.01f)
+        {
+            Vector3 moveDirection = new Vector3(inputWalk.x, 0f, inputWalk.y);
+            transform.rotation = Quaternion.LookRotation(moveDirection, Vector3.up);
+        }
     }
 }
