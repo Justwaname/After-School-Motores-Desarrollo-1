@@ -1795,7 +1795,7 @@ GameObject:
   - component: {fileID: 808063030}
   - component: {fileID: 808063031}
   m_Layer: 3
-  m_Name: Cube
+  m_Name: TestInteractCube
   m_TagString: Interactable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5436,11 +5436,11 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 808063029}
   - {fileID: 4371553296691370212}
+  - {fileID: 1997111029}
+  - {fileID: 1412668530}
+  - {fileID: 283915376}
   - {fileID: 698829148}
+  - {fileID: 1796200398}
   - {fileID: 1477611400}
   - {fileID: 1602483365}
   - {fileID: 1680056267}
-  - {fileID: 1997111029}
-  - {fileID: 1796200398}
-  - {fileID: 1412668530}
-  - {fileID: 283915376}
