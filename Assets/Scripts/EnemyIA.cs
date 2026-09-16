@@ -1,7 +1,3 @@
-using JetBrains.Annotations;
-using TreeEditor;
-using Unity.Mathematics;
-using UnityEditor.AdaptivePerformance.Editor;
 using UnityEngine;
 
 public class NewMonoBehaviourScript : MonoBehaviour
