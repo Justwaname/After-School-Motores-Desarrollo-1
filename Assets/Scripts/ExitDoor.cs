@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class ExitDoor : InteractableObject
 {
+    // --- INTERACCIÓN CON LA PUERTA ---
     public override void Interact()
     {
         if (GameManager.Instance.CanEscape())
@@ -15,6 +16,7 @@ public class ExitDoor : InteractableObject
         }
     }
 
+    // --- TEXTO DE INTERACCIÓN ---
     public override string GetInteractText()
     {
         if (GameManager.Instance.CanEscape())

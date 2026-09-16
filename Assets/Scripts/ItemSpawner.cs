@@ -4,13 +4,15 @@ public class ItemSpawner : MonoBehaviour
 {
     [Header("Configuración de Spawns")]
     [SerializeField] private GameObject keyItemPrefab;
-    [SerializeField] private string spawnPointTag = "SpawnPoint";   
+    [SerializeField] private string spawnPointTag = "SpawnPoint";
 
+    // --- INICIALIZACIÓN ---
     void Start()
     {
         SpawnItems();
     }
 
+    // --- GENERACIÓN DE OBJETOS ---
     void SpawnItems()
     {
         if (keyItemPrefab == null || spawnPointTag == null) return;
@@ -23,6 +25,7 @@ public class ItemSpawner : MonoBehaviour
             return;
         }
 
+        // --- CREAR ITEMS ---
         foreach (GameObject spawnPoint in spawnObjects)
         {
             if (spawnPoint != null)
@@ -32,6 +35,7 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
+    // --- VISUALIZACIÓN DE SPAWNS ---
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;

@@ -11,6 +11,8 @@ public class SphereCastInteractor : MonoBehaviour
     [SerializeField] private TextMeshProUGUI interactText;
     private PlayerInput playerInput;
     private InteractableObject currentInteractable;
+
+    // --- INICIALIZACIÓN ---
     private void Start()
     {
         playerInput = GetComponent<PlayerInput>();
@@ -21,6 +23,7 @@ public class SphereCastInteractor : MonoBehaviour
         }
     }
 
+    // --- LÓGICA PRINCIPAL ---
     private void Update()
     {
         // 1. Buscamos en cada frame si hay un interactuable
@@ -31,7 +34,7 @@ public class SphereCastInteractor : MonoBehaviour
         {
             currentInteractable.Interact();
 
-            // Ocultamos la UI tras interactuar (útil si el objeto es destruido)
+            // Ocultamos la UI tras interactuar
             if (interactText != null)
             {
                 interactText.gameObject.SetActive(false);
@@ -39,12 +42,14 @@ public class SphereCastInteractor : MonoBehaviour
         }
     }
 
+    // --- DETECCIÓN DE OBJETOS ---
     private void CheckForInteractable()
     {
         Vector3 origin = transform.position;
         Vector3 direction = transform.forward;
         Collider hitCollider = null;
 
+        // --- DETECCIÓN CERCANA ---
         // OverlapSphere para detectar dentro del origen
         Collider[] overlappingColliders = Physics.OverlapSphere(origin, interactRadius, interactableLayer);
 
@@ -52,11 +57,13 @@ public class SphereCastInteractor : MonoBehaviour
         {
             hitCollider = overlappingColliders[0];
         }
+        // --- DETECCIÓN HACIA ADELANTE con SphereCast---
         else if (Physics.SphereCast(origin, interactRadius, direction, out RaycastHit hitInfo, interactDistance, interactableLayer))
         {
             hitCollider = hitInfo.collider;
         }
 
+        // --- COMPROBAR OBJETO INTERACTUABLE ---
         if (hitCollider != null)
         {
             InteractableObject interactable = hitCollider.GetComponent<InteractableObject>();
@@ -65,7 +72,7 @@ public class SphereCastInteractor : MonoBehaviour
             {
                 currentInteractable = interactable;
 
-                // Actualizamos y mostramos el TextMeshPro
+                // --- MOSTRAR UI ---
                 if (interactText != null)
                 {
                     interactText.text = currentInteractable.GetInteractText();
@@ -83,7 +90,8 @@ public class SphereCastInteractor : MonoBehaviour
         }
     }
 
-    // OnDrawGizmosSelected para que solo se dibuje cuando seleccionas el objeto en Unity
+    // --- VISUALIZACIÓN DEL GIZMO ---
+    // se dibuja el gizmo cuando se selcciona el objeto en Unity
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;

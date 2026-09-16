@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float rotationSpeed = 15f; // Rotación suave
     private bool staminaDepleted = false;
 
+    // --- INICIALIZACIÓN ---
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -29,6 +30,7 @@ public class PlayerController : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
     }
 
+    // --- LÓGICA PRINCIPAL ---
     void Update()
     {
         inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
@@ -36,12 +38,14 @@ public class PlayerController : MonoBehaviour
 
         bool wantsToSprint = inputSprint > 0;
 
+        // --- CONTROL DE STAMINA ---
         if (stamina <= 0)
         {
             stamina = 0;
             staminaDepleted = true;
         }
 
+        // --- CORRER ---
         if (wantsToSprint && !staminaDepleted)
         {
             currentSpeed = runSpeed;
@@ -61,6 +65,7 @@ public class PlayerController : MonoBehaviour
             );
         }
 
+        // --- RECUPERACIÓN DE STAMINA ---
         if (timeStoppedRunning >= recoveryDelay)
         {
             stamina += staminaRecovery * Time.deltaTime;
@@ -81,6 +86,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // --- MOVIMIENTO Y ROTACIÓN ---
     private void FixedUpdate()
     {
         Vector3 moveDirection = new Vector3(inputWalk.x, 0f, inputWalk.y).normalized;

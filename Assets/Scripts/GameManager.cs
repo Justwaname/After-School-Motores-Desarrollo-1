@@ -4,6 +4,7 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    // --- SINGLETON ---
     public static GameManager Instance { get; private set; }
 
     [Header("Items")]
@@ -16,6 +17,7 @@ public class GameManager : MonoBehaviour
 
     private Coroutine hideTextCoroutine;
 
+    // --- INICIALIZACIÓN DEL GAME MANAGER ---
     private void Awake()
     {
         if (Instance == null)
@@ -27,6 +29,8 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    // --- MOSTRAR NOTIFICACIONES ---
     public void ShowNotification(string message)
     {
         if (notificationText == null) return;
@@ -41,6 +45,8 @@ public class GameManager : MonoBehaviour
         notificationText.gameObject.SetActive(true);
         hideTextCoroutine = StartCoroutine(HideTextAfterDelay(textDisplayDuration));
     }
+
+    // --- INICIALIZACIÓN DE LA UI ---
     private void Start()
     {
         if (notificationText != null)
@@ -49,6 +55,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // --- OBJETO RECOGIDO ---
     public void ItemCollected()
     {
         itemsCollected++;
@@ -58,6 +65,7 @@ public class GameManager : MonoBehaviour
         UpdateInteractionText();
     }
 
+    // --- ACTUALIZAR TEXTO DE INTERACCIÓN ---
     public bool CanEscape()
     {
         return itemsCollected >= itemsToEscape;
@@ -85,6 +93,7 @@ public class GameManager : MonoBehaviour
         hideTextCoroutine = StartCoroutine(HideTextAfterDelay(textDisplayDuration));
     }
 
+    // --- OCULTAR TEXTO DESPUÉS DE UN TIEMPO ---
     private IEnumerator HideTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);

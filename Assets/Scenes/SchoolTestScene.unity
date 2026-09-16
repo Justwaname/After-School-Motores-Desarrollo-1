@@ -2876,6 +2876,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: modelo escuela sin techo y con pasillos modificado v2
       objectReference: {fileID: 0}
+    - target: {fileID: 4622460899170814716, guid: dcf0569cb684ff64aa81a24dcb962bce, type: 3}
+      propertyPath: m_TagString
+      value: Wall
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

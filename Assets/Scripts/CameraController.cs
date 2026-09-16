@@ -8,6 +8,7 @@ public class CameraController : MonoBehaviour
 
     public float smoothSpeed = 5f;
 
+    // --- MOVIMIENTO DE LA CÁMARA ---
     void LateUpdate()
     {
         if (target == null) return;
