@@ -18,7 +18,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
     void Start()
     {
         ani = GetComponent<Animator>();
-        target = GameObject.Find("RobotKyle");
+        target = GameObject.Find("Player");
     }
 
 
