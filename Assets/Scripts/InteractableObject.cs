@@ -1,11 +1,16 @@
 using UnityEngine;
 
-public abstract class InteractableObject : MonoBehaviour
+public class InteractableObject : MonoBehaviour
 {
-    public abstract void Interact();
+    // Se ejecuta cuando el jugador interactúa con el objeto
+    public virtual void Interact()
+    {
+        Debug.Log("Se interactuó con el objeto.");
+    }
 
+    // Texto que puede mostrar la interfaz
     public virtual string GetInteractText()
     {
-        return gameObject.name + " interact";
+        return "[E] Interactuar";
     }
 }
