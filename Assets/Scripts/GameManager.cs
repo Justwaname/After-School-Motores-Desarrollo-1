@@ -12,12 +12,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int itemsCollected;
 
     [Header("UI")]
-    [SerializeField] private TextMeshProUGUI notificationText; // <--- Asignar NotificationText aquí
+    [SerializeField] private TextMeshProUGUI notificationText;
     [SerializeField] private float textDisplayDuration = 3f;
 
     private Coroutine hideTextCoroutine;
 
-    // --- INICIALIZACIÓN DEL GAME MANAGER ---
     private void Awake()
     {
         if (Instance == null)
@@ -30,10 +29,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- MOSTRAR NOTIFICACIONES ---
+    private void Start()
+    {
+        if (notificationText != null)
+        {
+            notificationText.gameObject.SetActive(false);
+        }
+    }
+
+    // --- NOTIFICACIONES ---
     public void ShowNotification(string message)
     {
-        if (notificationText == null) return;
+        if (notificationText == null)
+            return;
 
         notificationText.text = message;
 
@@ -43,16 +51,11 @@ public class GameManager : MonoBehaviour
         }
 
         notificationText.gameObject.SetActive(true);
-        hideTextCoroutine = StartCoroutine(HideTextAfterDelay(textDisplayDuration));
-    }
 
-    // --- INICIALIZACIÓN DE LA UI ---
-    private void Start()
-    {
-        if (notificationText != null)
-        {
-            notificationText.gameObject.SetActive(false);
-        }
+        hideTextCoroutine =
+            StartCoroutine(
+                HideTextAfterDelay(textDisplayDuration)
+            );
     }
 
     // --- OBJETO RECOGIDO ---
@@ -60,28 +63,37 @@ public class GameManager : MonoBehaviour
     {
         itemsCollected++;
 
-        Debug.Log($"Items recogidos: {itemsCollected}/{itemsToEscape}");
+        Debug.Log(
+            $"Items recogidos: {itemsCollected}/{itemsToEscape}"
+        );
 
         UpdateInteractionText();
     }
 
-    // --- ACTUALIZAR TEXTO DE INTERACCIÓN ---
+    // --- ¿PUEDE ESCAPAR? ---
     public bool CanEscape()
     {
-        return itemsCollected >= itemsToEscape;
+        if (Inventory.Instance == null)
+            return false;
+
+        return Inventory.Instance.HasItem("LlaveFinal");
     }
 
+    // --- ACTUALIZAR UI ---
     private void UpdateInteractionText()
     {
-        if (notificationText == null) return;
+        if (notificationText == null)
+            return;
 
         if (CanEscape())
         {
-            notificationText.text = "You can escape!";
+            notificationText.text =
+                "You created the final key! You can escape!";
         }
         else
         {
-            notificationText.text = $"Items: {itemsCollected}/{itemsToEscape}";
+            notificationText.text =
+                $"Items: {itemsCollected}/{itemsToEscape}";
         }
 
         if (hideTextCoroutine != null)
@@ -90,10 +102,14 @@ public class GameManager : MonoBehaviour
         }
 
         notificationText.gameObject.SetActive(true);
-        hideTextCoroutine = StartCoroutine(HideTextAfterDelay(textDisplayDuration));
+
+        hideTextCoroutine =
+            StartCoroutine(
+                HideTextAfterDelay(textDisplayDuration)
+            );
     }
 
-    // --- OCULTAR TEXTO DESPUÉS DE UN TIEMPO ---
+    // --- OCULTAR TEXTO ---
     private IEnumerator HideTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
