@@ -1991,6 +1991,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed8a3e34024103e429bb8be6d39dc129, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyItem
+  itemID: Pieza1
+  itemName: Pieza
 --- !u!1 &822580099 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 165424, guid: d496eb04924c3b042bce66ad9629b2bc, type: 3}
@@ -4801,12 +4803,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a70c6a77b4d7374ca6d790853ca8ce9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SphereCastInteractor
-  interactRadius: 1
-  interactDistance: 1
+  interactRadius: 0.8
+  interactDistance: 0.5
   interactableLayer:
     serializedVersion: 2
     m_Bits: 8
-  interactText: {fileID: 264831233}
+--- !u!114 &1793032540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793032532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d2bcb4d7792adb4ba46d77481b56101, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
 --- !u!1 &1796200395
 GameObject:
   m_ObjectHideFlags: 0
@@ -6060,6 +6073,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7655441515906449407, guid: 88d40d9dae155be4483b7b5c45045793, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1793032533}
+    - targetCorrespondingSourceObject: {fileID: 7655441515906449407, guid: 88d40d9dae155be4483b7b5c45045793, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1793032540}
   m_SourcePrefab: {fileID: 100100000, guid: 88d40d9dae155be4483b7b5c45045793, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -36,27 +36,46 @@ public class SphereCastInteractor : MonoBehaviour
         Vector3 origin = transform.position;
         Vector3 direction = transform.forward;
 
-        RaycastHit hitInfo;
+        Collider hitCollider = null;
 
-        bool hasHit = Physics.SphereCast(
-            origin,
-            interactRadius,
-            direction,
-            out hitInfo,
-            interactDistance,
-            interactableLayer
-        );
+        // OverlapSphere
+        Collider[] overlappingColliders = Physics.OverlapSphere(origin, interactRadius, interactableLayer);
 
-        if (hasHit)
+        if (overlappingColliders.Length > 0)
+        {
+            hitCollider = overlappingColliders[0];
+        }
+        else
+        {
+            // SphereCast
+            RaycastHit hitInfo;
+
+            bool hasHit = Physics.SphereCast(
+                origin,
+                interactRadius,
+                direction,
+                out hitInfo,
+                interactDistance,
+                interactableLayer
+            );
+
+            if (hasHit)
+            {
+                hitCollider = hitInfo.collider;
+            }
+        }
+
+        // 3. Comprobamos el resultado obtenido (ya sea por OverlapSphere o por SphereCast)
+        if (hitCollider != null)
         {
             InteractableObject interactable =
-                hitInfo.collider.GetComponentInParent<InteractableObject>();
+                hitCollider.GetComponentInParent<InteractableObject>();
 
             if (interactable != null)
             {
                 Debug.Log(
                     "SUCCESS: Interactable -> " +
-                    hitInfo.collider.gameObject.name
+                    hitCollider.gameObject.name
                 );
 
                 interactable.Interact();
