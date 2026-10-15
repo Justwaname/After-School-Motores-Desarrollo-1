@@ -10,25 +10,54 @@ public class SphereCastInteractor : MonoBehaviour
     public LayerMask interactableLayer;
 
     private PlayerInput playerInput;
+    private InputAction interactAction;
+    private PlayerHideController hideController;
+
+    private void Awake()
+    {
+        playerInput = GetComponent<PlayerInput>();
+        hideController = GetComponent<PlayerHideController>();
+    }
 
     private void Start()
     {
-        playerInput = GetComponent<PlayerInput>();
-
         if (playerInput == null)
         {
-            Debug.LogError("No se encontró PlayerInput en el Player.");
+            Debug.LogError(
+                "No se encontró PlayerInput en el Player."
+            );
+            return;
+        }
+
+        interactAction = playerInput.actions.FindAction(
+            "Interact",
+            false
+        );
+
+        if (interactAction == null)
+        {
+            Debug.LogError(
+                "No existe la acción 'Interact' en PlayerInput."
+            );
         }
     }
 
     private void Update()
     {
-        if (playerInput != null &&
-            playerInput.actions["Interact"].WasPressedThisFrame())
+        if (interactAction == null ||
+            !interactAction.WasPressedThisFrame())
         {
-            Debug.Log("E presionada");
-            TryInteract();
+            return;
         }
+
+        // Si está escondido, E sirve para salir.
+        if (hideController != null && hideController.IsHidden)
+        {
+            hideController.TryExitHide();
+            return;
+        }
+
+        TryInteract();
     }
 
     private void TryInteract()
@@ -36,48 +65,39 @@ public class SphereCastInteractor : MonoBehaviour
         Vector3 origin = transform.position;
         Vector3 direction = transform.forward;
 
-        RaycastHit hitInfo;
-
         bool hasHit = Physics.SphereCast(
             origin,
             interactRadius,
             direction,
-            out hitInfo,
+            out RaycastHit hitInfo,
             interactDistance,
             interactableLayer
         );
 
-        if (hasHit)
+        if (!hasHit)
         {
-            InteractableObject interactable =
-                hitInfo.collider.GetComponentInParent<InteractableObject>();
+            Debug.Log("No hay objetos interactuables delante.");
+            return;
+        }
 
-            if (interactable != null)
-            {
-                Debug.Log(
-                    "SUCCESS: Interactable -> " +
-                    hitInfo.collider.gameObject.name
-                );
+        InteractableObject interactable =
+            hitInfo.collider.GetComponentInParent<InteractableObject>();
 
-                interactable.Interact();
-            }
-            else
-            {
-                Debug.Log(
-                    "Objeto encontrado pero no tiene InteractableObject."
-                );
-            }
+        if (interactable != null)
+        {
+            interactable.Interact();
         }
         else
         {
-            Debug.Log("MISS: No hay objetos interactuables.");
+            Debug.Log(
+                "Objeto detectado, pero no tiene InteractableObject."
+            );
         }
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
-
         Gizmos.DrawWireSphere(
             transform.position,
             interactRadius
@@ -88,17 +108,9 @@ public class SphereCastInteractor : MonoBehaviour
             transform.forward * interactDistance;
 
         Gizmos.color = Color.blue;
-
-        Gizmos.DrawWireSphere(
-            endPosition,
-            interactRadius
-        );
+        Gizmos.DrawWireSphere(endPosition, interactRadius);
 
         Gizmos.color = Color.white;
-
-        Gizmos.DrawLine(
-            transform.position,
-            endPosition
-        );
+        Gizmos.DrawLine(transform.position, endPosition);
     }
 }
