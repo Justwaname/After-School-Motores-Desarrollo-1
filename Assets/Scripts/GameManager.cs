@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     // --- SINGLETON ---
     public static GameManager Instance { get; private set; }
 
+    [SerializeField] private ItemData finalKeyData;
+
     [Header("Items")]
     [SerializeField] private int itemsToEscape = 3;
     [SerializeField] private int itemsCollected;
@@ -76,7 +78,7 @@ public class GameManager : MonoBehaviour
         if (Inventory.Instance == null)
             return false;
 
-        return Inventory.Instance.HasItem("LlaveFinal");
+        return Inventory.Instance.HasItem(finalKeyData);
     }
 
     // --- ACTUALIZAR UI ---

@@ -10,6 +10,10 @@ public class PlayerController : MonoBehaviour
     private Vector2 inputWalk;
     private float inputSprint;
 
+    private float inputInventory;                  //lee para abrir el inventario
+    [SerializeField] private GameObject InvPanel;  //panel del inventario
+    [SerializeField]float InventoryTimer;          //cooldown para inventario
+
     [SerializeField] float currentSpeed;
     [SerializeField] float walkSpeed = 8f;
     [SerializeField] float runSpeed = 12f;
@@ -35,6 +39,17 @@ public class PlayerController : MonoBehaviour
     {
         inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
         inputSprint = playerInput.actions["Sprint"].ReadValue<float>();
+        inputInventory = playerInput.actions["Inventory"].ReadValue<float>();
+
+        // --- ABRIR/CERRAR INVENTARIO ---
+        if (inputInventory > 0 && InventoryTimer >= 1)
+        {
+            AltInventory();
+        }
+        if (InventoryTimer < 1)
+        {
+            InventoryTimer += Time.deltaTime;
+        }
 
         bool wantsToSprint = inputSprint > 0;
 
@@ -98,6 +113,15 @@ public class PlayerController : MonoBehaviour
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime));
+        }
+    }
+
+    // --- METODO P/ ABRIR/CERRAR INVENTARIO ---
+    private void AltInventory()
+    {
+        {
+            InvPanel.SetActive(!InvPanel.activeSelf);
+            InventoryTimer = 0f;
         }
     }
 }

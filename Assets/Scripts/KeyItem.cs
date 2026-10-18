@@ -6,6 +6,7 @@ public class KeyItem : InteractableObject
     [SerializeField] private string itemID = "Pieza1";
     [SerializeField] private string itemName = "Pieza";
 
+    public ItemData itemData;
     // Configurar el objeto desde ItemSpawner
     public void SetItemData(string newID, string newName)
     {
@@ -23,7 +24,7 @@ public class KeyItem : InteractableObject
             return;
         }
 
-        bool added = Inventory.Instance.AddItem(itemID);
+        bool added = Inventory.Instance.AddItem(itemData);
 
         if (!added)
         {

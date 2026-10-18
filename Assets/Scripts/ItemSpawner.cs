@@ -1,10 +1,62 @@
+using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class ItemSpawner : MonoBehaviour
 {
-    [Header("Configuración")]
-    [SerializeField] private GameObject keyItemPrefab;
+    [SerializeField] private GameObject[] prefabs;           // Prefabs de los objetos a spawnear
+    [SerializeField] private Transform[] spawnPoints;        // Puntos donde spawnear
+    [SerializeField] private int spawnCount = 3;             // Cuántos spawnear
+
+    private void Start()
+    {
+        SpawnUniqueItems();
+    }
+
+    private void SpawnUniqueItems()
+    {
+        if (prefabs == null || prefabs.Length == 0 ||
+            spawnPoints == null || spawnPoints.Length == 0)
+        {
+            Debug.LogError("ItemSpawner: prefabs o spawnPoints no asignados.");
+            return;
+        }
+
+        int maxPossible = Mathf.Min(prefabs.Length, spawnPoints.Length);
+        int toSpawn = Mathf.Clamp(spawnCount, 1, maxPossible);
+
+        // Copias para barajar sin modificar los originales
+        List<int> prefabIndices = new List<int>();
+        for (int i = 0; i < prefabs.Length; i++) prefabIndices.Add(i);
+        Shuffle(prefabIndices);
+
+        List<int> spawnIndices = new List<int>();
+        for (int i = 0; i < spawnPoints.Length; i++) spawnIndices.Add(i);
+        Shuffle(spawnIndices);
+
+        for (int i = 0; i < toSpawn; i++)
+        {
+            GameObject prefab = prefabs[prefabIndices[i]];
+            Transform spawnT = spawnPoints[spawnIndices[i]];
+            if (prefab == null || spawnT == null) continue;
+            Instantiate(prefab, spawnT.position, spawnT.rotation);
+        }
+    }
+
+    // Fisher–Yates shuffle
+    private void Shuffle<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            T tmp = list[i];
+            list[i] = list[j];
+            list[j] = tmp;
+        }
+    }
+    /*[Header("Configuración")]
+    [SerializeField] private GameObject Thermite;
+    [SerializeField] private GameObject Blowtorch;
+    [SerializeField] private GameObject MagnesiumRibbon;
     [SerializeField] private string spawnPointTag = "SpawnPoint";
 
     private void Start()
@@ -14,11 +66,6 @@ public class ItemSpawner : MonoBehaviour
 
     private void SpawnItems()
     {
-        if (keyItemPrefab == null)
-        {
-            Debug.LogError("[ItemSpawner] No asignaste el Key Item Prefab.");
-            return;
-        }
 
         GameObject[] spawnObjects =
             GameObject.FindGameObjectsWithTag(spawnPointTag);
@@ -85,7 +132,6 @@ public class ItemSpawner : MonoBehaviour
             );
         }
     }
-
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
@@ -103,5 +149,5 @@ public class ItemSpawner : MonoBehaviour
                 );
             }
         }
-    }
+    }*/
 }
