@@ -78,9 +78,14 @@ public class PlayerController : MonoBehaviour
             staminaDepleted = false;
         }
 
-        // --- LÓGICA DEL ANIMATOR ---
+        // --- LÓGICA DEL ANIMATOR (Actualizado para el Blend Tree 2D de la clase) ---
         if (anim != null)
         {
+            // Pasamos los ejes X e Y del Input System al Animator (MovX y MovZ)
+            anim.SetFloat("MovX", inputWalk.x);
+            anim.SetFloat("MovZ", inputWalk.y);
+
+            // Mantenemos el parámetro Speed por si lo usás en otras transiciones
             float animationSpeed = inputWalk.magnitude * (currentSpeed / walkSpeed);
             anim.SetFloat("Speed", animationSpeed);
         }
@@ -91,7 +96,9 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = new Vector3(inputWalk.x, 0f, inputWalk.y).normalized;
         Vector3 targetVelocity = moveDirection * (inputWalk.magnitude > 0.01f ? currentSpeed : 0f);
-        rb.linearVelocity = new Vector3(inputWalk.normalized.x * currentSpeed, -1, inputWalk.normalized.y * currentSpeed);
+
+        // Mantenemos tu lógica de físicas con Rigidbody
+        rb.linearVelocity = new Vector3(inputWalk.normalized.x * currentSpeed, rb.linearVelocity.y, inputWalk.normalized.y * currentSpeed);
 
         // Gira el personaje hacia la dirección del movimiento ---
         if (moveDirection.sqrMagnitude > 0.01f)
