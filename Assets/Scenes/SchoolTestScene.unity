@@ -5309,6 +5309,7 @@ MonoBehaviour:
   interactableLayer:
     serializedVersion: 2
     m_Bits: 8
+  interactText: {fileID: 264831233}
 --- !u!114 &1793032540
 MonoBehaviour:
   m_ObjectHideFlags: 0
