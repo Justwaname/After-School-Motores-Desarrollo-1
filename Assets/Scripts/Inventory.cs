@@ -5,7 +5,16 @@ public class Inventory : MonoBehaviour
 {
     public static Inventory Instance;
 
-    private List<string> items = new List<string>();
+    private List<ItemData> items = new List<ItemData>();
+    public IReadOnlyList<ItemData> Items => items;
+
+    [SerializeField] private ItemData Blowtorch;
+    [SerializeField] private ItemData MagnesiumRibbon;
+    [SerializeField] private ItemData Thermite;
+    [SerializeField] private ItemData FinalItem;
+
+    public delegate void OnItemChanged();
+    public OnItemChanged onItemChangedCallback;
 
     private void Awake()
     {
@@ -21,55 +30,56 @@ public class Inventory : MonoBehaviour
 
     // Añadir objeto al inventario
     // Devuelve true si realmente se añadió.
-    public bool AddItem(string itemID)
+    public bool AddItem(ItemData item)
     {
-        if (items.Contains(itemID))
+        if (items.Contains(item))
         {
             return false;
         }
 
-        items.Add(itemID);
+        items.Add(item);
 
-        Debug.Log("Objeto obtenido: " + itemID);
+        Debug.Log("Objeto obtenido: " + item);
 
-        CheckCombination();
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
 
         return true;
     }
 
     // Comprobar si tenemos un objeto
-    public bool HasItem(string itemID)
+    public bool HasItem(ItemData item)
     {
-        return items.Contains(itemID);
+        return items.Contains(item);
     }
 
     // Eliminar objeto
-    private void RemoveItem(string itemID)
+    private void RemoveItem(ItemData item)
     {
-        if (items.Contains(itemID))
+        if (items.Contains(item))
         {
-            items.Remove(itemID);
+            items.Remove(item);
         }
     }
 
     // Comprobar si las 3 piezas están juntas
-    private void CheckCombination()
+    public void CheckCombination()
     {
-        if (HasItem("Pieza1") &&
-            HasItem("Pieza2") &&
-            HasItem("Pieza3"))
+       if (HasItem(Blowtorch) &&
+            HasItem(MagnesiumRibbon) &&
+            HasItem(Thermite))
         {
-            RemoveItem("Pieza1");
-            RemoveItem("Pieza2");
-            RemoveItem("Pieza3");
-
+            items.Clear();
             // Crear el objeto nuevo
-            items.Add("LlaveFinal");
+            items.Add(FinalItem);
 
             Debug.Log("=================================");
             Debug.Log("LAS 3 PIEZAS SE HAN COMBINADO");
             Debug.Log("HAS CREADO LA LLAVE FINAL");
             Debug.Log("=================================");
+
+            if (onItemChangedCallback != null)
+                onItemChangedCallback.Invoke();//actualizar la UI
         }
     }
 }
