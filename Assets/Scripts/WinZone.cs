@@ -3,8 +3,9 @@ using TMPro;
 
 public class WinZone : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI winText; 
+    [SerializeField] private TextMeshProUGUI winText;
 
+    // --- DETECCIÓN DEL JUGADOR ---
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player") || other.GetComponent<PlayerController>() != null)

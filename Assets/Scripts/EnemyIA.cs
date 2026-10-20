@@ -1,7 +1,3 @@
-using JetBrains.Annotations;
-using TreeEditor;
-using Unity.Mathematics;
-using UnityEditor.AdaptivePerformance.Editor;
 using UnityEngine;
 
 public class NewMonoBehaviourScript : MonoBehaviour
@@ -15,14 +11,15 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     public GameObject target;
     public bool atacando;
+
+    // --- INICIALIZACIÓN ---
     void Start()
     {
         ani = GetComponent<Animator>();
-        target = GameObject.Find("RobotKyle");
+        target = GameObject.Find("Player");
     }
 
-
-   
+    // --- COMPORTAMIENTO DEL ENEMIGO ---
     public void Comportamiento_Enemigo()
     { 
         if (Vector3.Distance(transform.position, target.transform.position) > 5)
@@ -35,8 +32,10 @@ public class NewMonoBehaviourScript : MonoBehaviour
             rutina = UnityEngine.Random.Range(0, 2);
             cronometro = 0;
         }
-        switch (rutina)
-        {
+
+            // --- RUTINAS DE MOVIMIENTO ---
+            switch (rutina)
+            {
             case 0:
 
                 ani.SetBool("walk", false);
@@ -58,6 +57,8 @@ public class NewMonoBehaviourScript : MonoBehaviour
             }
 
         }
+
+        // --- PERSECUCIÓN DEL JUGADOR ---
         else
         {
             if (Vector3.Distance(transform.position, target.transform.position) > 1 && atacando)
@@ -78,7 +79,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
                 ani.SetBool("attack", false);
             }
 
-
+            // --- ATAQUE ---
             else
             {
                 ani.SetBool("walk", false);
@@ -87,9 +88,11 @@ public class NewMonoBehaviourScript : MonoBehaviour
                      ani.SetBool ("attack", true);
                      atacando = true;
 
-                }
             }
-         }
+        }
+    }
+
+    // --- FINALIZAR ATAQUE ---
     public void Final_Ani()
     {
         {
@@ -103,7 +106,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
 
         }
-   }
+    }
+
+    // --- ACTUALIZACIÓN ---
     void Update()
     {
       Comportamiento_Enemigo();

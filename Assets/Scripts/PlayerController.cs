@@ -10,6 +10,9 @@ public class PlayerController : MonoBehaviour
     private Vector2 inputWalk;
     private float inputSprint;
 
+    private float inputInventory;                  //lee para abrir el inventario
+    [SerializeField] private GameObject InvPanel;  //panel del inventario
+
     [SerializeField] float currentSpeed;
     [SerializeField] float walkSpeed = 8f;
     [SerializeField] float runSpeed = 12f;
@@ -22,6 +25,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float rotationSpeed = 15f; // Rotación suave
     private bool staminaDepleted = false;
 
+    // --- INICIALIZACIÓN ---
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -29,19 +33,29 @@ public class PlayerController : MonoBehaviour
         anim = GetComponentInChildren<Animator>();
     }
 
+    // --- LÓGICA PRINCIPAL ---
     void Update()
     {
         inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
         inputSprint = playerInput.actions["Sprint"].ReadValue<float>();
+        inputInventory = playerInput.actions["Inventory"].ReadValue<float>();
+
+        // --- ABRIR/CERRAR INVENTARIO ---
+        if (playerInput != null && playerInput.actions["Inventory"].WasPressedThisFrame())
+        {
+            AltInventory();
+        }
 
         bool wantsToSprint = inputSprint > 0;
 
+        // --- CONTROL DE STAMINA ---
         if (stamina <= 0)
         {
             stamina = 0;
             staminaDepleted = true;
         }
 
+        // --- CORRER ---
         if (wantsToSprint && !staminaDepleted)
         {
             currentSpeed = runSpeed;
@@ -61,6 +75,7 @@ public class PlayerController : MonoBehaviour
             );
         }
 
+        // --- RECUPERACIÓN DE STAMINA ---
         if (timeStoppedRunning >= recoveryDelay)
         {
             stamina += staminaRecovery * Time.deltaTime;
@@ -81,6 +96,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // --- MOVIMIENTO Y ROTACIÓN ---
     private void FixedUpdate()
     {
         Vector3 moveDirection = new Vector3(inputWalk.x, 0f, inputWalk.y).normalized;
@@ -92,6 +108,14 @@ public class PlayerController : MonoBehaviour
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime));
+        }
+    }
+
+    // --- METODO P/ ABRIR/CERRAR INVENTARIO ---
+    private void AltInventory()
+    {
+        {
+            InvPanel.SetActive(!InvPanel.activeSelf);
         }
     }
 }
