@@ -12,7 +12,6 @@ public class PlayerController : MonoBehaviour
 
     private float inputInventory;                  //lee para abrir el inventario
     [SerializeField] private GameObject InvPanel;  //panel del inventario
-    [SerializeField]float InventoryTimer;          //cooldown para inventario
 
     [SerializeField] float currentSpeed;
     [SerializeField] float walkSpeed = 8f;
@@ -42,13 +41,9 @@ public class PlayerController : MonoBehaviour
         inputInventory = playerInput.actions["Inventory"].ReadValue<float>();
 
         // --- ABRIR/CERRAR INVENTARIO ---
-        if (inputInventory > 0 && InventoryTimer >= 1)
+        if (playerInput != null && playerInput.actions["Inventory"].WasPressedThisFrame())
         {
             AltInventory();
-        }
-        if (InventoryTimer < 1)
-        {
-            InventoryTimer += Time.deltaTime;
         }
 
         bool wantsToSprint = inputSprint > 0;
@@ -121,7 +116,6 @@ public class PlayerController : MonoBehaviour
     {
         {
             InvPanel.SetActive(!InvPanel.activeSelf);
-            InventoryTimer = 0f;
         }
     }
 }
