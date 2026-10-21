@@ -2,10 +2,12 @@ using UnityEngine;
 
 public class KeyItem : InteractableObject
 {
-    [Header("InformaciÛn del objeto")]
+    [Header("Informaci√≥n del objeto")]
     [SerializeField] private string itemID = "Pieza1";
     [SerializeField] private string itemName = "Pieza";
 
+    public ItemData itemData;
+    // Configurar el objeto desde ItemSpawner
     public void SetItemData(string newID, string newName)
     {
         itemID = newID;
@@ -21,9 +23,11 @@ public class KeyItem : InteractableObject
             return;
         }
 
-        if (Inventory.Instance.HasItem(itemID))
+        bool added = Inventory.Instance.AddItem(itemData);
+
+        if (!added)
         {
-            Debug.Log("Este objeto ya est· en el inventario.");
+            Debug.Log("Este objeto ya est√° en el inventario.");
             return;
         }
 
