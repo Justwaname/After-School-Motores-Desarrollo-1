@@ -35,7 +35,6 @@ public class Inventory : MonoBehaviour
         if (items.Contains(item))
         {
             return false;
-        }
 
         items.Add(item);
 
@@ -80,6 +79,13 @@ public class Inventory : MonoBehaviour
 
             if (onItemChangedCallback != null)
                 onItemChangedCallback.Invoke();//actualizar la UI
+            if (HorrorSFXManager.Instance != null)
+            {
+                HorrorSFXManager.Instance.PlaySFX(
+                    HorrorSFXEvent.KeyCombined,
+                    transform.position
+                );
+            }
         }
     }
 }

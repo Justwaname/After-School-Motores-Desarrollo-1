@@ -17,10 +17,29 @@ public class SphereCastInteractor : MonoBehaviour
     private void Start()
     {
         playerInput = GetComponent<PlayerInput>();
+        hideController = GetComponent<PlayerHideController>();
+    }
 
+    private void Start()
+    {
         if (playerInput == null)
         {
-            Debug.LogError("No se encontró PlayerInput en el Player.");
+            Debug.LogError(
+                "No se encontró PlayerInput en el Player."
+            );
+            return;
+        }
+
+        interactAction = playerInput.actions.FindAction(
+            "Interact",
+            false
+        );
+
+        if (interactAction == null)
+        {
+            Debug.LogError(
+                "No existe la acción 'Interact' en PlayerInput."
+            );
         }
 
         if (interactText != null)
@@ -49,6 +68,8 @@ public class SphereCastInteractor : MonoBehaviour
                 interactText.gameObject.SetActive(false);
             }
         }
+
+        TryInteract();
     }
 
     // --- DETECCIÓN DE OBJETOS ---
