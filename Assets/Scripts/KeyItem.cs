@@ -39,11 +39,6 @@ public class KeyItem : InteractableObject
             );
         }
 
-        bool added = Inventory.Instance.AddItem(itemID);
-
-        if (!added)
-            return;
-
         Debug.Log("Objeto recogido: " + itemName);
 
         if (GameManager.Instance != null)

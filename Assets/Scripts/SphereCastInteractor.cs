@@ -17,29 +17,10 @@ public class SphereCastInteractor : MonoBehaviour
     private void Start()
     {
         playerInput = GetComponent<PlayerInput>();
-        hideController = GetComponent<PlayerHideController>();
-    }
 
-    private void Start()
-    {
         if (playerInput == null)
         {
-            Debug.LogError(
-                "No se encontró PlayerInput en el Player."
-            );
-            return;
-        }
-
-        interactAction = playerInput.actions.FindAction(
-            "Interact",
-            false
-        );
-
-        if (interactAction == null)
-        {
-            Debug.LogError(
-                "No existe la acción 'Interact' en PlayerInput."
-            );
+            Debug.LogError("No se encontró PlayerInput en el Player.");
         }
 
         if (interactText != null)
@@ -55,8 +36,8 @@ public class SphereCastInteractor : MonoBehaviour
         CheckForInteractable();
 
         // 2. Si se presiona la E y hay un objeto válido
-        if (playerInput != null && 
-            playerInput.actions["Interact"].WasPressedThisFrame() && 
+        if (playerInput != null &&
+            playerInput.actions["Interact"].WasPressedThisFrame() &&
             currentInteractable != null)
         {
             Debug.Log("E presionada: Interactuando con " + currentInteractable.gameObject.name);
@@ -68,8 +49,6 @@ public class SphereCastInteractor : MonoBehaviour
                 interactText.gameObject.SetActive(false);
             }
         }
-
-        TryInteract();
     }
 
     // --- DETECCIÓN DE OBJETOS ---
