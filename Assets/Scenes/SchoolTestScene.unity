@@ -2050,6 +2050,8 @@ MonoBehaviour:
   atacando: 0
   distanciaDeteccion: 5
   distanciaAtaque: 1
+  walkFootstepInterval: 0.55
+  runFootstepInterval: 0.35
 --- !u!95 &822580101 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 9542308, guid: d496eb04924c3b042bce66ad9629b2bc, type: 3}
@@ -2270,6 +2272,132 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2523770497806563527, guid: dcf0569cb684ff64aa81a24dcb962bce, type: 3}
+--- !u!1 &1110287808
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1110287810}
+  - component: {fileID: 1110287809}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1110287809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110287808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 998213b8864b92045a49f2c249cbd185, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HorrorSFXManager
+  sfxGroup: {fileID: 0}
+  minDistance: 1
+  maxDistance: 20
+  sounds:
+  - eventType: 0
+    clips:
+    - {fileID: 8300000, guid: 0d5c3ecde30dc9143a257ce42c776040, type: 3}
+    - {fileID: 8300000, guid: 39180093d32f4f241b12de1e4ced38f8, type: 3}
+    - {fileID: 8300000, guid: 9b72c2ca3a013bc4aad74f397a051895, type: 3}
+    volume: 1
+    spatialBlend: 0
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+  - eventType: 1
+    clips:
+    - {fileID: 8300000, guid: c9431d8edd9e027438841ad92bfe13a0, type: 3}
+    volume: 1
+    spatialBlend: 0
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+  - eventType: 2
+    clips:
+    - {fileID: 8300000, guid: e94f166c8f61a7445a37803553cca7c2, type: 3}
+    volume: 1
+    spatialBlend: 1
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+  - eventType: 3
+    clips:
+    - {fileID: 8300000, guid: 9d79c7ea834827348a3153f89ac9e344, type: 3}
+    - {fileID: 8300000, guid: f4db85086de422a49b7bf583a9c43242, type: 3}
+    volume: 1
+    spatialBlend: 1
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+  - eventType: 4
+    clips:
+    - {fileID: 8300000, guid: 870457d7c986a0a4fa6bcaad32ef523d, type: 3}
+    volume: 1
+    spatialBlend: 1
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+  - eventType: 5
+    clips:
+    - {fileID: 8300000, guid: 86fa377bfe3baa74fae0b577a2f8b37a, type: 3}
+    - {fileID: 8300000, guid: 14f20781b8ddc8343bfb4ecab3662384, type: 3}
+    - {fileID: 8300000, guid: 14f20781b8ddc8343bfb4ecab3662384, type: 3}
+    volume: 1
+    spatialBlend: 1
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+  - eventType: 6
+    clips:
+    - {fileID: 8300000, guid: a1e79374cc1963a48829cd7982d2226c, type: 3}
+    - {fileID: 8300000, guid: 05e05edb1ffeedd41b92de8435f9074c, type: 3}
+    volume: 1
+    spatialBlend: 1
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+  - eventType: 7
+    clips:
+    - {fileID: 8300000, guid: 7838ebb2d786eec408ed19f8ab1d143a, type: 3}
+    volume: 1
+    spatialBlend: 0
+    randomizePitch: 1
+    pitchRange: {x: 0.95, y: 1.05}
+    randomizeVolume: 1
+    volumeRange: {x: 0.9, y: 1}
+--- !u!4 &1110287810
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1110287808}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 14.66378, y: 0.25, z: 10.18027}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1112846464
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6282,3 +6410,4 @@ SceneRoots:
   - {fileID: 1602483365}
   - {fileID: 1680056267}
   - {fileID: 1983713396}
+  - {fileID: 1110287810}

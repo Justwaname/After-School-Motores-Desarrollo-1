@@ -17,14 +17,16 @@ public class NewMonoBehaviourScript : MonoBehaviour
     public float distanciaDeteccion = 5f;
     public float distanciaAtaque = 1f;
 
-    // Detectar si el jugador está escondido en una taquilla
+    [Header("Audio de pasos")]
+    [SerializeField] private float walkFootstepInterval = 0.55f;
+    [SerializeField] private float runFootstepInterval = 0.35f;
+
+    private float footstepTimer;
     private PlayerHideController playerHideController;
 
-    // INICIALIZACIÓN
     void Start()
     {
         ani = GetComponent<Animator>();
-
         target = GameObject.Find("Player");
 
         if (target != null)
@@ -40,25 +42,23 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
     }
 
-    // ACTUALIZACIÓN
     void Update()
     {
         if (target == null)
             return;
 
-        // Si el jugador está escondido, detener al enemigo
         if (playerHideController != null &&
             playerHideController.IsHidden)
         {
             DetenerEnemigo();
+            footstepTimer = 0f;
             return;
         }
 
-        // Si no está escondido, continuar con la IA normal
         Comportamiento_Enemigo();
+        ActualizarPasos();
     }
 
-    // DETENER AL ENEMIGO
     private void DetenerEnemigo()
     {
         if (ani != null)
@@ -71,7 +71,6 @@ public class NewMonoBehaviourScript : MonoBehaviour
         atacando = false;
     }
 
-    // COMPORTAMIENTO DEL ENEMIGO
     public void Comportamiento_Enemigo()
     {
         if (target == null)
@@ -126,7 +125,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
                     break;
             }
         }
-        // PERSEGUIR AL JUGADOR
+        // PERSECUCIÓN
         else if (distancia > distanciaAtaque)
         {
             Vector3 direccion =
@@ -160,9 +159,18 @@ public class NewMonoBehaviourScript : MonoBehaviour
                 Space.Self
             );
         }
-        // ATACAR AL JUGADOR
+        // ATAQUE
         else
         {
+            if (!atacando &&
+                HorrorSFXManager.Instance != null)
+            {
+                HorrorSFXManager.Instance.PlaySFX(
+                    HorrorSFXEvent.EnemyAttack,
+                    transform.position
+                );
+            }
+
             if (ani != null)
             {
                 ani.SetBool("walk", false);
@@ -174,7 +182,40 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
     }
 
-    // FINALIZAR ANIMACIÓN DE ATAQUE
+    private void ActualizarPasos()
+    {
+        if (ani == null)
+            return;
+
+        bool walking = ani.GetBool("walk");
+        bool running = ani.GetBool("run");
+
+        if (!walking && !running)
+        {
+            footstepTimer = 0f;
+            return;
+        }
+
+        footstepTimer += Time.deltaTime;
+
+        float interval = running
+            ? runFootstepInterval
+            : walkFootstepInterval;
+
+        if (footstepTimer >= interval)
+        {
+            if (HorrorSFXManager.Instance != null)
+            {
+                HorrorSFXManager.Instance.PlaySFX(
+                    HorrorSFXEvent.EnemyFootsteps,
+                    transform.position
+                );
+            }
+
+            footstepTimer = 0f;
+        }
+    }
+
     public void Final_Ani()
     {
         if (ani != null)

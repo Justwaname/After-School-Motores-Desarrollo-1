@@ -6,7 +6,6 @@ public class KeyItem : InteractableObject
     [SerializeField] private string itemID = "Pieza1";
     [SerializeField] private string itemName = "Pieza";
 
-    // Configurar el objeto desde ItemSpawner
     public void SetItemData(string newID, string newName)
     {
         itemID = newID;
@@ -14,7 +13,6 @@ public class KeyItem : InteractableObject
         gameObject.name = newName;
     }
 
-    // Interacción
     public override void Interact()
     {
         if (Inventory.Instance == null)
@@ -23,13 +21,24 @@ public class KeyItem : InteractableObject
             return;
         }
 
-        bool added = Inventory.Instance.AddItem(itemID);
-
-        if (!added)
+        if (Inventory.Instance.HasItem(itemID))
         {
             Debug.Log("Este objeto ya está en el inventario.");
             return;
         }
+
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.ItemPickup,
+                transform.position
+            );
+        }
+
+        bool added = Inventory.Instance.AddItem(itemID);
+
+        if (!added)
+            return;
 
         Debug.Log("Objeto recogido: " + itemName);
 
@@ -41,7 +50,6 @@ public class KeyItem : InteractableObject
         Destroy(gameObject);
     }
 
-    // Texto de interacción
     public override string GetInteractText()
     {
         return itemName + " [E] para recoger";

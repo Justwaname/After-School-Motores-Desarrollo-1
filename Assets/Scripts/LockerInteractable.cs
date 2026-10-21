@@ -51,12 +51,25 @@ public class LockerInteractable : InteractableObject
 
     public void PlayOpenAnimation()
     {
+        PlaySFX(HorrorSFXEvent.LockerOpen);
         SetAnimatorTrigger(openTrigger);
     }
 
     public void PlayCloseAnimation()
     {
+        PlaySFX(HorrorSFXEvent.LockerClose);
         SetAnimatorTrigger(closeTrigger);
+    }
+
+    private void PlaySFX(HorrorSFXEvent eventType)
+    {
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                eventType,
+                transform.position
+            );
+        }
     }
 
     private void SetAnimatorTrigger(string triggerName)
@@ -88,9 +101,7 @@ public class LockerInteractable : InteractableObject
     public override string GetInteractText()
     {
         if (occupant != null)
-        {
             return "Taquilla ocupada";
-        }
 
         return "E - Esconderse";
     }

@@ -4,7 +4,6 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    // --- SINGLETON ---
     public static GameManager Instance { get; private set; }
 
     [Header("Items")]
@@ -37,9 +36,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- NOTIFICACIONES ---
     public void ShowNotification(string message)
     {
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.UINotification,
+                transform.position
+            );
+        }
+
         if (notificationText == null)
             return;
 
@@ -58,7 +64,6 @@ public class GameManager : MonoBehaviour
             );
     }
 
-    // --- OBJETO RECOGIDO ---
     public void ItemCollected()
     {
         itemsCollected++;
@@ -70,7 +75,6 @@ public class GameManager : MonoBehaviour
         UpdateInteractionText();
     }
 
-    // --- ¿PUEDE ESCAPAR? ---
     public bool CanEscape()
     {
         if (Inventory.Instance == null)
@@ -79,7 +83,6 @@ public class GameManager : MonoBehaviour
         return Inventory.Instance.HasItem("LlaveFinal");
     }
 
-    // --- ACTUALIZAR UI ---
     private void UpdateInteractionText()
     {
         if (notificationText == null)
@@ -109,7 +112,6 @@ public class GameManager : MonoBehaviour
             );
     }
 
-    // --- OCULTAR TEXTO ---
     private IEnumerator HideTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
