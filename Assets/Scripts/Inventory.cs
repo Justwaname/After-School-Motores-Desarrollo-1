@@ -1,20 +1,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class InventoryNote
+{
+    public string id;
+    public string title;
+
+    [TextArea(3, 10)]
+    public string content;
+
+    public InventoryNote(string noteID, string noteTitle, string noteContent)
+    {
+        id = noteID;
+        title = noteTitle;
+        content = noteContent;
+    }
+}
+
 public class Inventory : MonoBehaviour
 {
     public static Inventory Instance;
 
-    private List<ItemData> items = new List<ItemData>();
-    public IReadOnlyList<ItemData> Items => items;
-
-    [SerializeField] private ItemData Blowtorch;
-    [SerializeField] private ItemData MagnesiumRibbon;
-    [SerializeField] private ItemData Thermite;
-    [SerializeField] private ItemData FinalItem;
-
-    public delegate void OnItemChanged();
-    public OnItemChanged onItemChangedCallback;
+    private List<string> items = new List<string>();
+    private List<InventoryNote> notes = new List<InventoryNote>();
 
     private void Awake()
     {
@@ -28,58 +37,83 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    // Añadir objeto al inventario
-    // Devuelve true si realmente se añadió.
-    public bool AddItem(ItemData item)
+    // AGREGAR OBJETOS Y PIEZAS
+    public bool AddItem(string itemID)
     {
-        if (items.Contains(item))
-        {
+        if (items.Contains(itemID))
             return false;
-        }
 
-        items.Add(item);
+        items.Add(itemID);
 
-        Debug.Log("Objeto obtenido: " + item);
+        Debug.Log("Objeto obtenido: " + itemID);
 
-        if (onItemChangedCallback != null)
-            onItemChangedCallback.Invoke();
+        CheckCombination();
 
         return true;
     }
 
-    // Comprobar si tenemos un objeto
-    public bool HasItem(ItemData item)
+    public bool HasItem(string itemID)
     {
-        return items.Contains(item);
+        return items.Contains(itemID);
     }
 
-    // Eliminar objeto
-    private void RemoveItem(ItemData item)
+    private void RemoveItem(string itemID)
     {
-        if (items.Contains(item))
+        items.Remove(itemID);
+    }
+
+    // AGREGAR UNA NOTA AL INVENTARIO
+    public bool AddNote(string noteID, string title, string content)
+    {
+        if (HasNote(noteID))
         {
-            items.Remove(item);
+            Debug.Log("Esta nota ya está guardada: " + title);
+            return false;
         }
+
+        InventoryNote newNote =
+            new InventoryNote(noteID, title, content);
+
+        notes.Add(newNote);
+
+        Debug.Log("Nota guardada: " + title);
+
+        return true;
     }
 
-    // Comprobar si las 3 piezas están juntas
-    public void CheckCombination()
+    // COMPROBAR SI YA TENEMOS UNA NOTA
+    public bool HasNote(string noteID)
     {
-       if (HasItem(Blowtorch) &&
-            HasItem(MagnesiumRibbon) &&
-            HasItem(Thermite))
+        return notes.Exists(note => note.id == noteID);
+    }
+
+    // OBTENER UNA NOTA POR SU ID
+    public InventoryNote GetNote(string noteID)
+    {
+        return notes.Find(note => note.id == noteID);
+    }
+
+    // OBTENER TODAS LAS NOTAS
+    public List<InventoryNote> GetAllNotes()
+    {
+        return new List<InventoryNote>(notes);
+    }
+
+    // COMBINAR LAS TRES PIEZAS
+    private void CheckCombination()
+    {
+        if (HasItem("Pieza1") &&
+            HasItem("Pieza2") &&
+            HasItem("Pieza3"))
         {
-            items.Clear();
-            // Crear el objeto nuevo
-            items.Add(FinalItem);
+            RemoveItem("Pieza1");
+            RemoveItem("Pieza2");
+            RemoveItem("Pieza3");
 
-            Debug.Log("=================================");
-            Debug.Log("LAS 3 PIEZAS SE HAN COMBINADO");
-            Debug.Log("HAS CREADO LA LLAVE FINAL");
-            Debug.Log("=================================");
+            items.Add("LlaveFinal");
 
-            if (onItemChangedCallback != null)
-                onItemChangedCallback.Invoke();//actualizar la UI
+            Debug.Log("¡LAS 3 PIEZAS SE HAN COMBINADO!");
+            Debug.Log("¡HAS CONSEGUIDO LA LLAVE FINAL!");
 
             if (HorrorSFXManager.Instance != null)
             {

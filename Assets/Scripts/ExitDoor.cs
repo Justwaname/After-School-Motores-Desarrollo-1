@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class ExitDoor : InteractableObject
 {
-    // --- INTERACCIÓN CON LA PUERTA ---
     public override void Interact()
     {
         if (GameManager.Instance == null)
@@ -13,11 +12,17 @@ public class ExitDoor : InteractableObject
 
         if (GameManager.Instance.CanEscape())
         {
+            if (HorrorSFXManager.Instance != null)
+            {
+                HorrorSFXManager.Instance.PlaySFX(
+                    HorrorSFXEvent.ExitDoor,
+                    transform.position
+                );
+            }
+
             Debug.Log("¡PUERTA ABIERTA!");
 
-            GameManager.Instance.ShowNotification(
-                "Door opened!"
-            );
+            GameManager.Instance.ShowNotification("Door opened!");
 
             Destroy(gameObject);
         }
@@ -29,7 +34,6 @@ public class ExitDoor : InteractableObject
         }
     }
 
-    // --- TEXTO DE INTERACCIÓN ---
     public override string GetInteractText()
     {
         if (GameManager.Instance != null &&
