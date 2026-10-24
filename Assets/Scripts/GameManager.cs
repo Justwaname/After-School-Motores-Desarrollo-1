@@ -82,7 +82,11 @@ public class GameManager : MonoBehaviour
         if (Inventory.Instance == null)
             return false;
 
-        return Inventory.Instance.HasItem(finalKeyData);
+        // Ahora exigimos tener tanto el ítem combinado como el Blowtorch original
+        bool hasFinalItem = Inventory.Instance.HasItem(finalKeyData);
+        bool hasBlowtorch = Inventory.Instance.HasItem(Inventory.Instance.GetBlowtorch());
+
+        return hasFinalItem && hasBlowtorch;
     }
 
     private void UpdateInteractionText()
@@ -93,7 +97,7 @@ public class GameManager : MonoBehaviour
         if (CanEscape())
         {
             notificationText.text =
-                "You created the final key! You can escape!";
+                "You have everything needed to open the door!";
         }
         else
         {

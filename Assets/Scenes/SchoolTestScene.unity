@@ -1836,7 +1836,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1793032540}
+      - m_Target: {fileID: 1793032534}
         m_TargetAssemblyTypeName: Inventory, Assembly-CSharp
         m_MethodName: CheckCombination
         m_Mode: 1
@@ -5502,7 +5502,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   interactText: {fileID: 264831233}
---- !u!114 &1793032540
 --- !u!114 &1793032534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5519,15 +5518,6 @@ MonoBehaviour:
   MagnesiumRibbon: {fileID: 11400000, guid: f35bf90b06f19c544a25d8af434d9a07, type: 2}
   Thermite: {fileID: 11400000, guid: 48e4da508ca22a34d9105be3d574f2a9, type: 2}
   FinalItem: {fileID: 11400000, guid: 3ec6c9f67bded3845a66689f9dd8e8c4, type: 2}
-  m_Script: {fileID: 11500000, guid: edb557ae691eba34ab6dada03f08794c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerHideController
-  playerAnimator: {fileID: 0}
-  enterHideTrigger: EnterHide
-  exitHideTrigger: ExitHide
-  enterAnimationDuration: 0.8
-  exitAnimationDuration: 0.8
-  doorOpenDelay: 0.25
 --- !u!1 &1796200395
 GameObject:
   m_ObjectHideFlags: 0
@@ -6516,7 +6506,7 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
+  m_Maskable: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -7226,7 +7216,6 @@ PrefabInstance:
       addedObject: {fileID: 1793032533}
     - targetCorrespondingSourceObject: {fileID: 7655441515906449407, guid: 88d40d9dae155be4483b7b5c45045793, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1793032540}
       addedObject: {fileID: 1793032534}
   m_SourcePrefab: {fileID: 100100000, guid: 88d40d9dae155be4483b7b5c45045793, type: 3}
 --- !u!1660057539 &9223372036854775807

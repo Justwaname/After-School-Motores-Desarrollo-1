@@ -22,7 +22,19 @@ public class Inventory : MonoBehaviour
 {
     public static Inventory Instance;
 
-    private List<string> items = new List<string>();
+    // --- LÓGICA DE OBJETOS ---
+    private List<ItemData> items = new List<ItemData>();
+    public IReadOnlyList<ItemData> Items => items;
+
+    [SerializeField] private ItemData Blowtorch;
+    [SerializeField] private ItemData MagnesiumRibbon;
+    [SerializeField] private ItemData Thermite;
+    [SerializeField] private ItemData FinalItem;
+
+    public delegate void OnItemChanged();
+    public OnItemChanged onItemChangedCallback;
+
+    // --- LÓGICA DE NOTAS ---
     private List<InventoryNote> notes = new List<InventoryNote>();
 
     private void Awake()
@@ -37,83 +49,69 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    // AGREGAR OBJETOS Y PIEZAS
-    public bool AddItem(string itemID)
+    // --- AÑADIR OBJETO AL INVENTARIO ---
+    public bool AddItem(ItemData item)
     {
-        if (items.Contains(itemID))
-            return false;
-
-        items.Add(itemID);
-
-        Debug.Log("Objeto obtenido: " + itemID);
-
-        CheckCombination();
-
-        return true;
-    }
-
-    public bool HasItem(string itemID)
-    {
-        return items.Contains(itemID);
-    }
-
-    private void RemoveItem(string itemID)
-    {
-        items.Remove(itemID);
-    }
-
-    // AGREGAR UNA NOTA AL INVENTARIO
-    public bool AddNote(string noteID, string title, string content)
-    {
-        if (HasNote(noteID))
+        if (items.Contains(item))
         {
-            Debug.Log("Esta nota ya está guardada: " + title);
             return false;
         }
 
-        InventoryNote newNote =
-            new InventoryNote(noteID, title, content);
+        items.Add(item);
+        Debug.Log("Objeto obtenido: " + item.name);
 
-        notes.Add(newNote);
-
-        Debug.Log("Nota guardada: " + title);
+        if (onItemChangedCallback != null)
+            onItemChangedCallback.Invoke();
 
         return true;
     }
 
-    // COMPROBAR SI YA TENEMOS UNA NOTA
-    public bool HasNote(string noteID)
+    // --- COMPROBAR SI TENEMOS UN OBJETO ---
+    public bool HasItem(ItemData item)
     {
-        return notes.Exists(note => note.id == noteID);
+        return items.Contains(item);
     }
 
-    // OBTENER UNA NOTA POR SU ID
-    public InventoryNote GetNote(string noteID)
+    // --- ELIMINAR OBJETO ---
+    public bool RemoveItem(ItemData item)
     {
-        return notes.Find(note => note.id == noteID);
-    }
-
-    // OBTENER TODAS LAS NOTAS
-    public List<InventoryNote> GetAllNotes()
-    {
-        return new List<InventoryNote>(notes);
-    }
-
-    // COMBINAR LAS TRES PIEZAS
-    private void CheckCombination()
-    {
-        if (HasItem("Pieza1") &&
-            HasItem("Pieza2") &&
-            HasItem("Pieza3"))
+        if (items.Contains(item))
         {
-            RemoveItem("Pieza1");
-            RemoveItem("Pieza2");
-            RemoveItem("Pieza3");
+            items.Remove(item);
+            if (onItemChangedCallback != null)
+                onItemChangedCallback.Invoke();
+            return true;
+        }
+        return false;
+    }
 
-            items.Add("LlaveFinal");
+    // --- OBTENER REFERENCIAS ---
+    public ItemData GetBlowtorch() => Blowtorch;
+    public ItemData GetMagnesiumRibbon() => MagnesiumRibbon;
+    public ItemData GetThermite() => Thermite;
+    public ItemData GetFinalItem() => FinalItem;
 
-            Debug.Log("¡LAS 3 PIEZAS SE HAN COMBINADO!");
-            Debug.Log("¡HAS CONSEGUIDO LA LLAVE FINAL!");
+    // --- COMBINAR (Evita duplicados si ya tenemos el FinalItem) ---
+    public void CheckCombination()
+    {
+        // Si ya tenemos el ítem final, no permitimos volver a combinar
+        if (HasItem(FinalItem))
+        {
+            Debug.Log("Ya tienes el ítem final creado.");
+            return;
+        }
+
+        // Verificamos que tenga los dos ingredientes necesarios
+        if (HasItem(MagnesiumRibbon) && HasItem(Thermite))
+        {
+            RemoveItem(MagnesiumRibbon);
+            RemoveItem(Thermite);
+
+            items.Add(FinalItem);
+
+            Debug.Log("=================================");
+            Debug.Log("¡TERMITA Y MAGNESIO COMBINADOS!");
+            Debug.Log("=================================");
 
             if (HorrorSFXManager.Instance != null)
             {
@@ -122,6 +120,28 @@ public class Inventory : MonoBehaviour
                     transform.position
                 );
             }
+
+            if (onItemChangedCallback != null)
+                onItemChangedCallback.Invoke();
+        }
+        else
+        {
+            Debug.Log("No tienes los ingredientes necesarios para combinar (Thermite + MagnesiumRibbon).");
         }
     }
+
+    // ==========================================
+    // --- SISTEMA DE NOTAS ---
+    // ==========================================
+
+    public bool AddNote(string noteID, string title, string content)
+    {
+        if (HasNote(noteID)) return false;
+        notes.Add(new InventoryNote(noteID, title, content));
+        return true;
+    }
+
+    public bool HasNote(string noteID) => notes.Exists(note => note.id == noteID);
+    public InventoryNote GetNote(string noteID) => notes.Find(note => note.id == noteID);
+    public List<InventoryNote> GetAllNotes() => new List<InventoryNote>(notes);
 }
