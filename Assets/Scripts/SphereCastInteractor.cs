@@ -36,8 +36,8 @@ public class SphereCastInteractor : MonoBehaviour
         CheckForInteractable();
 
         // 2. Si se presiona la E y hay un objeto válido
-        if (playerInput != null && 
-            playerInput.actions["Interact"].WasPressedThisFrame() && 
+        if (playerInput != null &&
+            playerInput.actions["Interact"].WasPressedThisFrame() &&
             currentInteractable != null)
         {
             Debug.Log("E presionada: Interactuando con " + currentInteractable.gameObject.name);

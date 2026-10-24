@@ -1,10 +1,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class InventoryNote
+{
+    public string id;
+    public string title;
+
+    [TextArea(3, 10)]
+    public string content;
+
+    public InventoryNote(string noteID, string noteTitle, string noteContent)
+    {
+        id = noteID;
+        title = noteTitle;
+        content = noteContent;
+    }
+}
+
 public class Inventory : MonoBehaviour
 {
     public static Inventory Instance;
 
+    // --- LÓGICA DE OBJETOS ---
     private List<ItemData> items = new List<ItemData>();
     public IReadOnlyList<ItemData> Items => items;
 
@@ -15,6 +33,9 @@ public class Inventory : MonoBehaviour
 
     public delegate void OnItemChanged();
     public OnItemChanged onItemChangedCallback;
+
+    // --- LÓGICA DE NOTAS ---
+    private List<InventoryNote> notes = new List<InventoryNote>();
 
     private void Awake()
     {
@@ -28,8 +49,7 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    // Añadir objeto al inventario
-    // Devuelve true si realmente se añadió.
+    // --- AÑADIR OBJETO AL INVENTARIO ---
     public bool AddItem(ItemData item)
     {
         if (items.Contains(item))
@@ -38,8 +58,7 @@ public class Inventory : MonoBehaviour
         }
 
         items.Add(item);
-
-        Debug.Log("Objeto obtenido: " + item);
+        Debug.Log("Objeto obtenido: " + item.name);
 
         if (onItemChangedCallback != null)
             onItemChangedCallback.Invoke();
@@ -47,39 +66,82 @@ public class Inventory : MonoBehaviour
         return true;
     }
 
-    // Comprobar si tenemos un objeto
+    // --- COMPROBAR SI TENEMOS UN OBJETO ---
     public bool HasItem(ItemData item)
     {
         return items.Contains(item);
     }
 
-    // Eliminar objeto
-    private void RemoveItem(ItemData item)
+    // --- ELIMINAR OBJETO ---
+    public bool RemoveItem(ItemData item)
     {
         if (items.Contains(item))
         {
             items.Remove(item);
+            if (onItemChangedCallback != null)
+                onItemChangedCallback.Invoke();
+            return true;
         }
+        return false;
     }
 
-    // Comprobar si las 3 piezas están juntas
+    // --- OBTENER REFERENCIAS ---
+    public ItemData GetBlowtorch() => Blowtorch;
+    public ItemData GetMagnesiumRibbon() => MagnesiumRibbon;
+    public ItemData GetThermite() => Thermite;
+    public ItemData GetFinalItem() => FinalItem;
+
+    // --- COMBINAR (Evita duplicados si ya tenemos el FinalItem) ---
     public void CheckCombination()
     {
-       if (HasItem(Blowtorch) &&
-            HasItem(MagnesiumRibbon) &&
-            HasItem(Thermite))
+        // Si ya tenemos el ítem final, no permitimos volver a combinar
+        if (HasItem(FinalItem))
         {
-            items.Clear();
-            // Crear el objeto nuevo
+            Debug.Log("Ya tienes el ítem final creado.");
+            return;
+        }
+
+        // Verificamos que tenga los dos ingredientes necesarios
+        if (HasItem(MagnesiumRibbon) && HasItem(Thermite))
+        {
+            RemoveItem(MagnesiumRibbon);
+            RemoveItem(Thermite);
+
             items.Add(FinalItem);
 
             Debug.Log("=================================");
-            Debug.Log("LAS 3 PIEZAS SE HAN COMBINADO");
-            Debug.Log("HAS CREADO LA LLAVE FINAL");
+            Debug.Log("¡TERMITA Y MAGNESIO COMBINADOS!");
             Debug.Log("=================================");
 
+            if (HorrorSFXManager.Instance != null)
+            {
+                HorrorSFXManager.Instance.PlaySFX(
+                    HorrorSFXEvent.KeyCombined,
+                    transform.position
+                );
+            }
+
             if (onItemChangedCallback != null)
-                onItemChangedCallback.Invoke();//actualizar la UI
+                onItemChangedCallback.Invoke();
+        }
+        else
+        {
+            Debug.Log("No tienes los ingredientes necesarios para combinar (Thermite + MagnesiumRibbon).");
         }
     }
+
+    // ==========================================
+    // --- SISTEMA DE NOTAS ---
+    // ==========================================
+
+    public bool AddNote(string noteID, string title, string content)
+    {
+        if (HasNote(noteID)) return false;
+        notes.Add(new InventoryNote(noteID, title, content));
+        return true;
+    }
+
+    public bool HasNote(string noteID) => notes.Exists(note => note.id == noteID);
+    public InventoryNote GetNote(string noteID) => notes.Find(note => note.id == noteID);
+    public List<InventoryNote> GetAllNotes() => new List<InventoryNote>(notes);
 }
