@@ -4,8 +4,9 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    // --- SINGLETON ---
     public static GameManager Instance { get; private set; }
+
+    [SerializeField] private ItemData finalKeyData;
 
     [Header("Items")]
     [SerializeField] private int itemsToEscape = 3;
@@ -37,9 +38,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // --- NOTIFICACIONES ---
     public void ShowNotification(string message)
     {
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.UINotification,
+                transform.position
+            );
+        }
+
         if (notificationText == null)
             return;
 
@@ -58,7 +66,6 @@ public class GameManager : MonoBehaviour
             );
     }
 
-    // --- OBJETO RECOGIDO ---
     public void ItemCollected()
     {
         itemsCollected++;
@@ -70,16 +77,18 @@ public class GameManager : MonoBehaviour
         UpdateInteractionText();
     }
 
-    // --- ¿PUEDE ESCAPAR? ---
     public bool CanEscape()
     {
         if (Inventory.Instance == null)
             return false;
 
-        return Inventory.Instance.HasItem("LlaveFinal");
+        // Ahora exigimos tener tanto el ítem combinado como el Blowtorch original
+        bool hasFinalItem = Inventory.Instance.HasItem(finalKeyData);
+        bool hasBlowtorch = Inventory.Instance.HasItem(Inventory.Instance.GetBlowtorch());
+
+        return hasFinalItem && hasBlowtorch;
     }
 
-    // --- ACTUALIZAR UI ---
     private void UpdateInteractionText()
     {
         if (notificationText == null)
@@ -88,7 +97,7 @@ public class GameManager : MonoBehaviour
         if (CanEscape())
         {
             notificationText.text =
-                "You created the final key! You can escape!";
+                "You have everything needed to open the door!";
         }
         else
         {
@@ -109,7 +118,6 @@ public class GameManager : MonoBehaviour
             );
     }
 
-    // --- OCULTAR TEXTO ---
     private IEnumerator HideTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);

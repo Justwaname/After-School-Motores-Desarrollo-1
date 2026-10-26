@@ -2,10 +2,11 @@ using UnityEngine;
 
 public class KeyItem : InteractableObject
 {
-    [Header("Información del objeto")]
+    [Header("InformaciÃ³n del objeto")]
     [SerializeField] private string itemID = "Pieza1";
     [SerializeField] private string itemName = "Pieza";
 
+    public ItemData itemData;
     // Configurar el objeto desde ItemSpawner
     public void SetItemData(string newID, string newName)
     {
@@ -14,7 +15,6 @@ public class KeyItem : InteractableObject
         gameObject.name = newName;
     }
 
-    // Interacción
     public override void Interact()
     {
         if (Inventory.Instance == null)
@@ -23,12 +23,20 @@ public class KeyItem : InteractableObject
             return;
         }
 
-        bool added = Inventory.Instance.AddItem(itemID);
+        bool added = Inventory.Instance.AddItem(itemData);
 
         if (!added)
         {
-            Debug.Log("Este objeto ya está en el inventario.");
+            Debug.Log("Este objeto ya estÃ¡ en el inventario.");
             return;
+        }
+
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.ItemPickup,
+                transform.position
+            );
         }
 
         Debug.Log("Objeto recogido: " + itemName);
@@ -41,7 +49,6 @@ public class KeyItem : InteractableObject
         Destroy(gameObject);
     }
 
-    // Texto de interacción
     public override string GetInteractText()
     {
         return itemName + " [E] para recoger";

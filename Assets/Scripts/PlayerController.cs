@@ -5,16 +5,18 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    // =========================================================================
-    // 1. VARIABLES PRINCIPALES (Movimiento, Inputs y Animaciones)
-    // =========================================================================
-    private Rigidbody rb;
+Â  Â  // =========================================================================
+Â  Â  // 1. VARIABLES PRINCIPALES (Movimiento, Inputs y Animaciones)
+Â  Â  // =========================================================================
+Â  Â  private Rigidbody rb;
     private PlayerInput playerInput;
     private Animator anim;
     private Vector2 inputWalk;
     private float inputSprint;
 
-    [Header("--- CONFIGURACIÓN DE MOVIMIENTO Y STAMINA ---")]
+    private float inputInventory;                  //lee para abrir el inventario
+    [SerializeField] private GameObject InvPanel;  //panel del inventario
+
     [SerializeField] float currentSpeed;
     [SerializeField] float walkSpeed = 8f;
     [SerializeField] float runSpeed = 12f;
@@ -27,31 +29,38 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float rotationSpeed = 15f;
     private bool staminaDepleted = false;
 
-    // =========================================================================
-    // 2. VARIABLES DE AUDIO INTERACTIVO (Agregado para el Bloque F)
-    // =========================================================================
-    [Header("--- CONFIGURACIÓN DE AUDIO INTERACTIVO (Bloque F) ---")]
-    [SerializeField] private AudioMixer gameAudioMixer; // Controla parámetros globales del Mixer
-    [SerializeField] private AudioSource footstepsAudioSource; // Controla el sonido de pasos
-    [SerializeField] private float minPitch = 0.8f;
+Â  Â  // =========================================================================
+Â  Â  // 2. VARIABLES DE AUDIO INTERACTIVO (Agregado para el Bloque F)
+Â  Â  // =========================================================================
+Â  Â  [Header("--- CONFIGURACIÃ“N DE AUDIO INTERACTIVO (Bloque F) ---")]
+    [SerializeField] private AudioMixer gameAudioMixer; // Controla parÃ¡metros globales del Mixer
+Â  Â  [SerializeField] private AudioSource footstepsAudioSource; // Controla el sonido de pasos
+Â  Â  [SerializeField] private float minPitch = 0.8f;
     [SerializeField] private float maxPitch = 1.3f;
 
-    // --- INICIALIZACIÓN ---
-    void Start()
+Â  Â  // --- INICIALIZACIÃ“N ---
+Â  Â  void Start()
     {
         rb = GetComponent<Rigidbody>();
         playerInput = GetComponent<PlayerInput>();
         anim = GetComponentInChildren<Animator>();
     }
 
-    // --- LÓGICA PRINCIPAL (Actualización por frame) ---
-    void Update()
+Â  Â  // --- LÃ“GICA PRINCIPAL (ActualizaciÃ³n por frame) ---
+Â  Â  void Update()
     {
-        // -----------------------------------------------------------------
-        // BLOQUE DE INPUTS Y STAMINA 
-        // -----------------------------------------------------------------
-        inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
+Â  Â  Â  Â  // -----------------------------------------------------------------
+Â  Â  Â  Â  // BLOQUE DE INPUTS Y STAMINAÂ 
+Â  Â  Â  Â  // -----------------------------------------------------------------
+Â  Â  Â  Â  inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
         inputSprint = playerInput.actions["Sprint"].ReadValue<float>();
+        inputInventory = playerInput.actions["Inventory"].ReadValue<float>();
+
+        // --- ABRIR/CERRAR INVENTARIO ---
+        if (playerInput != null && playerInput.actions["Inventory"].WasPressedThisFrame())
+        {
+            AltInventory();
+        }
 
         bool wantsToSprint = inputSprint > 0;
 
@@ -89,10 +98,10 @@ public class PlayerController : MonoBehaviour
             staminaDepleted = false;
         }
 
-        // -----------------------------------------------------------------
-        // BLOQUE DEL ANIMATOR (Blend Tree 2D)
-        // -----------------------------------------------------------------
-        if (anim != null)
+Â  Â  Â  Â  // -----------------------------------------------------------------
+Â  Â  Â  Â  // BLOQUE DEL ANIMATOR (Blend Tree 2D)
+Â  Â  Â  Â  // -----------------------------------------------------------------
+Â  Â  Â  Â  if (anim != null)
         {
             anim.SetFloat("MovX", inputWalk.x);
             anim.SetFloat("MovZ", inputWalk.y);
@@ -101,26 +110,26 @@ public class PlayerController : MonoBehaviour
             anim.SetFloat("Speed", animationSpeed);
         }
 
-        // -----------------------------------------------------------------
-        // BLOQUE F: AUDIO INTERACTIVO (Llamada al método externo de audio)
-        // Editar este método si se precisa ajustar o cambiar el sonido ante 
-        // ante las acciones del jugador.
-        // -----------------------------------------------------------------
-        GestionarAudioInteractivo();
+Â  Â  Â  Â  // -----------------------------------------------------------------
+Â  Â  Â  Â  // BLOQUE F: AUDIO INTERACTIVO (Llamada al mÃ©todo externo de audio)
+Â  Â  Â  Â  // Editar este mÃ©todo si se precisa ajustar o cambiar el sonido anteÂ 
+Â  Â  Â  Â  // ante las acciones del jugador.
+Â  Â  Â  Â  // -----------------------------------------------------------------
+Â  Â  Â  Â  GestionarAudioInteractivo();
     }
 
-    // =========================================================================
-    // MÉTODO EXCLUSIVO DEL BLOQUE F (Audio Interactivo)
-    // Controlar los dos parámetros exigidos:
-    // 1. El Pitch del AudioSource según la velocidad de desplazamiento.
-    // 2. Un parámetro dinámico dentro del AudioMixer.
-    // =========================================================================
-    void GestionarAudioInteractivo()
+Â  Â  // =========================================================================
+Â  Â  // MÃ‰TODO EXCLUSIVO DEL BLOQUE F (Audio Interactivo)
+Â  Â  // Controlar los dos parÃ¡metros exigidos:
+Â  Â  // 1. El Pitch del AudioSource segÃºn la velocidad de desplazamiento.
+Â  Â  // 2. Un parÃ¡metro dinÃ¡mico dentro del AudioMixer.
+Â  Â  // =========================================================================
+Â  Â  void GestionarAudioInteractivo()
     {
         if (footstepsAudioSource != null)
         {
-            // Parámetro 1: Modifica la velocidad/tono de los pasos si corre o camina
-            if (inputWalk.sqrMagnitude > 0.01f)
+Â  Â  Â  Â  Â  Â  // ParÃ¡metro 1: Modifica la velocidad/tono de los pasos si corre o camina
+Â  Â  Â  Â  Â  Â  if (inputWalk.sqrMagnitude > 0.01f)
             {
                 footstepsAudioSource.pitch = (currentSpeed > walkSpeed) ? maxPitch : minPitch;
                 if (!footstepsAudioSource.isPlaying) footstepsAudioSource.Play();
@@ -133,16 +142,16 @@ public class PlayerController : MonoBehaviour
 
         if (gameAudioMixer != null)
         {
-            // Parámetro 2: Modifica el volumen o un efecto del Mixer según el movimiento
-            float targetVolume = (inputWalk.sqrMagnitude > 0.01f) ? 0f : -10f;
+Â  Â  Â  Â  Â  Â  // ParÃ¡metro 2: Modifica el volumen o un efecto del Mixer segÃºn el movimiento
+Â  Â  Â  Â  Â  Â  float targetVolume = (inputWalk.sqrMagnitude > 0.01f) ? 0f : -10f;
             gameAudioMixer.SetFloat("MasterVolume", targetVolume);
         }
     }
 
-    // =========================================================================
-    // 3. FÍSICAS Y MOVIMIENTO (Rigidbody y Rotación Suave)
-    // =========================================================================
-    private void FixedUpdate()
+Â  Â  // =========================================================================
+Â  Â  // 3. FÃSICAS Y MOVIMIENTO (Rigidbody y RotaciÃ³n Suave)
+Â  Â  // =========================================================================
+Â  Â  private void FixedUpdate()
     {
         Vector3 moveDirection = new Vector3(inputWalk.x, 0f, inputWalk.y).normalized;
 
@@ -156,6 +165,14 @@ public class PlayerController : MonoBehaviour
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime));
+        }
+    }
+
+    // --- METODO P/ ABRIR/CERRAR INVENTARIO ---
+    private void AltInventory()
+    {
+        {
+            InvPanel.SetActive(!InvPanel.activeSelf);
         }
     }
 }
