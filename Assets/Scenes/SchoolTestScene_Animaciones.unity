@@ -1993,6 +1993,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::KeyItem
   itemID: Pieza1
   itemName: Pieza
+  itemData: {fileID: 0}
 --- !u!1 &822580099 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 165424, guid: d496eb04924c3b042bce66ad9629b2bc, type: 3}
@@ -2017,6 +2018,10 @@ MonoBehaviour:
   grado: 0
   target: {fileID: 1793032532}
   atacando: 0
+  distanciaDeteccion: 5
+  distanciaAtaque: 1
+  walkFootstepInterval: 0.55
+  runFootstepInterval: 0.35
 --- !u!95 &822580101 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 9542308, guid: d496eb04924c3b042bce66ad9629b2bc, type: 3}
@@ -2178,6 +2183,95 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -4657004746798163661, guid: dcf0569cb684ff64aa81a24dcb962bce, type: 3}
+--- !u!1 &983478434 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: edab8eba69a8bc04ea5f01c085877fba, type: 3}
+  m_PrefabInstance: {fileID: 1963305421}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &983478437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 983478434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad530e2ca3409e44b93f6a4e17a8b059, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  InvPanel: {fileID: 0}
+  currentSpeed: 0
+  walkSpeed: 8
+  runSpeed: 12
+  maxStamina: 7
+  stamina: 7
+  staminaDrain: 2
+  staminaRecovery: 1.5
+  timeStoppedRunning: 0
+  recoveryDelay: 0.7
+  rotationSpeed: 15
+  gameAudioMixer: {fileID: 0}
+  footstepsAudioSource: {fileID: 0}
+  minPitch: 0.8
+  maxPitch: 1.3
+--- !u!114 &983478438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 983478434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: 
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
+--- !u!54 &983478439
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 983478434}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 80
+  m_CollisionDetection: 0
 --- !u!1 &1013040712 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 74a8c3f029f765b48b73692cbb054c69, type: 3}
@@ -4497,6 +4591,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d603f7eb501194c4685f2f16c40ecf75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  finalKeyData: {fileID: 0}
   itemsToEscape: 3
   itemsCollected: 0
   notificationText: {fileID: 1679820370}
@@ -4808,6 +4903,7 @@ MonoBehaviour:
   interactableLayer:
     serializedVersion: 2
     m_Bits: 8
+  interactText: {fileID: 0}
 --- !u!114 &1793032540
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4820,6 +4916,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d2bcb4d7792adb4ba46d77481b56101, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  Blowtorch: {fileID: 0}
+  MagnesiumRibbon: {fileID: 0}
+  Thermite: {fileID: 0}
+  FinalItem: {fileID: 0}
 --- !u!1 &1796200395
 GameObject:
   m_ObjectHideFlags: 0
@@ -5132,10 +5232,23 @@ PrefabInstance:
       propertyPath: m_Name
       value: Remy@Breathing Idle
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: edab8eba69a8bc04ea5f01c085877fba, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: deb2b2ed0c5030e40b5b4fbcc4e76bb1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: edab8eba69a8bc04ea5f01c085877fba, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 983478439}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: edab8eba69a8bc04ea5f01c085877fba, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 983478438}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: edab8eba69a8bc04ea5f01c085877fba, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 983478437}
   m_SourcePrefab: {fileID: 100100000, guid: edab8eba69a8bc04ea5f01c085877fba, type: 3}
 --- !u!1001 &1973183190
 PrefabInstance:
