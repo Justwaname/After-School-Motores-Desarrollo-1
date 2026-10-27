@@ -14,8 +14,10 @@ public class PlayerController : MonoBehaviour
     private Vector2 inputWalk;
     private float inputSprint;
 
-    private float inputInventory;
     [SerializeField] private GameObject InvPanel;
+
+    // Control para bloquear/desbloquear movimiento durante animaciones
+    private bool canMove = true;
 
     [Header("--- MOVIMIENTO Y STAMINA ---")]
     [SerializeField] float currentSpeed;
@@ -50,42 +52,22 @@ public class PlayerController : MonoBehaviour
     // --- LÓGICA PRINCIPAL ---
     void Update()
     {
-        inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
-        inputSprint = playerInput.actions["Sprint"].ReadValue<float>();
-        inputInventory = playerInput.actions["Inventory"].ReadValue<float>();
+        // Si canMove es falso, anulamos los inputs de movimiento por completo
+        if (!canMove)
+        {
+            inputWalk = Vector2.zero;
+            inputSprint = 0f;
+        }
+        else
+        {
+            inputWalk = playerInput.actions["Move"].ReadValue<Vector2>();
+            inputSprint = playerInput.actions["Sprint"].ReadValue<float>();
+        }
 
         // --- ABRIR/CERRAR INVENTARIO ---
         if (playerInput != null && playerInput.actions["Inventory"].WasPressedThisFrame())
         {
             AltInventory();
-        }
-
-        // --- ACCIONES DE TECLADO (Q, E, J, K) CON LOS NOMBRES EXACTOS DEL ANIMATOR ---
-        if (Keyboard.current != null && anim != null)
-        {
-            // Q: Abrir puerta
-            if (Keyboard.current.qKey.wasPressedThisFrame)
-            {
-                anim.SetTrigger("TriggerOpening");
-            }
-
-            // E: Tocar el botón
-            if (Keyboard.current.eKey.wasPressedThisFrame)
-            {
-                anim.SetTrigger("TriggerInteract");
-            }
-
-            // J: Escalar
-            if (Keyboard.current.jKey.wasPressedThisFrame)
-            {
-                anim.SetTrigger("TriggerBracedHangToCrouch");
-            }
-
-            // K: Bajar
-            if (Keyboard.current.kKey.wasPressedThisFrame)
-            {
-                anim.SetTrigger("TriggerClimbingDown");
-            }
         }
 
         bool wantsToSprint = inputSprint > 0;
@@ -127,15 +109,47 @@ public class PlayerController : MonoBehaviour
         // --- ANIMATOR (Blend Tree 2D) ---
         if (anim != null)
         {
-            anim.SetFloat("MovX", inputWalk.x);
-            anim.SetFloat("MovZ", inputWalk.y);
-
             float animationSpeed = inputWalk.magnitude * (currentSpeed / walkSpeed);
             anim.SetFloat("Speed", animationSpeed);
         }
 
         // --- AUDIO INTERACTIVO (Bloque F) ---
         GestionarAudioInteractivo();
+    }
+
+    // =========================================================================
+    // MÉTODOS PARA ACTIVAR LAS ANIMACIONES Y BLOQUEAR/DESBLOQUEAR MOVIMIENTO
+    // =========================================================================
+    public void TriggerInteractAnimation()
+    {
+        if (anim != null)
+        {
+            anim.SetTrigger("TriggerInteract");
+        }
+    }
+
+    public void TriggerOpeningAnimation()
+    {
+        if (anim != null)
+        {
+            anim.SetTrigger("TriggerOpening");
+        }
+    }
+
+    public void LockMovement()
+    {
+        canMove = false;
+        inputWalk = Vector2.zero;
+        inputSprint = 0f;
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+        }
+    }
+
+    public void UnlockMovement()
+    {
+        canMove = true;
     }
 
     // =========================================================================
@@ -183,7 +197,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // --- METODO P/ ABRIR/CERRAR INVENTARIO (Con protección contra nulos) ---
+    // --- METODO P/ ABRIR/CERRAR INVENTARIO ---
     private void AltInventory()
     {
         if (InvPanel != null)
