@@ -170,8 +170,13 @@ public class NewMonoBehaviourScript : MonoBehaviour
                     transform.position
                 );
             }
-
-            if (ani != null)
+            PlayerHealth playerHealth = target.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage();
+            }
+        
+        if (ani != null)
             {
                 ani.SetBool("walk", false);
                 ani.SetBool("run", false);

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float timeStoppedRunning = 0f;
     [SerializeField] float recoveryDelay = 0.7f;
     [SerializeField] private float rotationSpeed = 15f;
+    [SerializeField] private Slider staminaSlider;
     private bool staminaDepleted = false;
 
     // =========================================================================
@@ -47,6 +49,12 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         playerInput = GetComponent<PlayerInput>();
         anim = GetComponentInChildren<Animator>();
+
+        if (staminaSlider != null)
+        {
+            staminaSlider.maxValue = maxStamina;
+            staminaSlider.value = stamina;
+        }
     }
 
     // --- LÓGICA PRINCIPAL ---
@@ -104,6 +112,11 @@ public class PlayerController : MonoBehaviour
         {
             stamina = maxStamina;
             staminaDepleted = false;
+        }
+        // --- ACTUALIZAR BARRA DE STAMINA EN UI ---
+        if (staminaSlider != null)
+        {
+            staminaSlider.value = stamina;
         }
 
         // --- ANIMATOR (Blend Tree 2D) ---
