@@ -2,8 +2,39 @@ using UnityEngine;
 
 public class ExitDoor : InteractableObject
 {
+    public float anguloApertura = 90f;
+    public float velocidadApertura = 2f;
+
+    private bool puertaAbierta = false;
+
+    private Quaternion rotacionCerrada;
+    private Quaternion rotacionAbierta;
+
+    private void Start()
+    {
+        rotacionCerrada = transform.localRotation;
+
+        rotacionAbierta =
+            rotacionCerrada *
+            Quaternion.Euler(0f, anguloApertura, 0f);
+    }
+
+    private void Update()
+    {
+        if (puertaAbierta)
+        {
+            transform.localRotation = Quaternion.Slerp(
+                transform.localRotation,
+                rotacionAbierta,
+                Time.deltaTime * velocidadApertura
+            );
+        }
+    }
     public override void Interact()
     {
+        if (puertaAbierta)
+            return;
+
         if (GameManager.Instance == null)
         {
             Debug.LogError("No existe GameManager en la escena.");
@@ -28,8 +59,8 @@ public class ExitDoor : InteractableObject
                 Inventory.Instance.RemoveItem(Inventory.Instance.GetFinalItem());
                 Inventory.Instance.RemoveItem(Inventory.Instance.GetBlowtorch());
             }
-            
-            Destroy(gameObject);
+
+            puertaAbierta = true;
         }
         else
         {
