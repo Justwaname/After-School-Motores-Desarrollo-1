@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement; // <-- Necesario para reiniciar la escena
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -16,13 +17,17 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private Image damageVignetteImage;
 
     [Header("Interfaz de Corazones (UI)")]
-    [SerializeField] private Image[] heartImages; // Arrastra aquí tus 3 imágenes de corazones desde el Canvas en orden (0, 1, 2)
-    [SerializeField] private Sprite fullHeartSprite; // Arrastra el sprite de corazon lleno
-    [SerializeField] private Sprite emptyHeartSprite; // Arrastra el sprite de corazon muerto
+    [SerializeField] private Image[] heartImages;
+    [SerializeField] private Sprite fullHeartSprite;
+    [SerializeField] private Sprite emptyHeartSprite;
 
+    [Header("Pantalla de Game Over")]
+    [SerializeField] private GameObject gameOverTextObj;   // Arrastra aquí tu GameOverText
+    [SerializeField] private GameObject restartButtonObj;  
+    [SerializeField] private GameObject MenuButtonobj;     
     void Start()
     {
-        // Asegurar que la viñeta empiece transparente
+        // Asegurar que la viñeta y los elementos de muerte comiencen ocultos
         if (damageVignetteImage != null)
         {
             Color c = damageVignetteImage.color;
@@ -30,6 +35,9 @@ public class PlayerHealth : MonoBehaviour
             damageVignetteImage.color = c;
         }
 
+        if (gameOverTextObj) gameOverTextObj.SetActive(false);
+        if (restartButtonObj ) restartButtonObj.SetActive(false);
+        if (MenuButtonobj ) MenuButtonobj.SetActive(false);
         ActualizarCorazonesUI();
     }
 
@@ -58,7 +66,7 @@ public class PlayerHealth : MonoBehaviour
         {
             Color c = damageVignetteImage.color;
 
-            // Bordes rojos según el golpe (centro libre)
+           
             if (currentHits == 1) c.a = 0.2f;
             else if (currentHits == 2) c.a = 0.5f;
             else if (currentHits >= 3) c.a = 1.0f;
@@ -71,12 +79,10 @@ public class PlayerHealth : MonoBehaviour
     {
         if (heartImages == null) return;
 
-        // Recorre los corazones y cambia el sprite según los golpes recibidos
         for (int i = 0; i < heartImages.Length; i++)
         {
             if (heartImages[i] != null)
             {
-                // Si el índice es menor a los golpes actuales, el corazón está "muerto/perdido"
                 if (i < currentHits)
                 {
                     heartImages[i].sprite = emptyHeartSprite;
@@ -99,6 +105,27 @@ public class PlayerHealth : MonoBehaviour
     private void Morir()
     {
         Debug.Log("El jugador ha muerto tras recibir 3 golpes.");
-   // aca se  cambiara a la escena de muerte
+
+        
+        if (gameOverTextObj != null) gameOverTextObj.SetActive(true);
+        if (restartButtonObj != null) restartButtonObj.SetActive(true);
+        if (MenuButtonobj != null) MenuButtonobj.SetActive(true);
+        Time.timeScale = 0f;
     }
+
+    
+    public void ReiniciarJuego()
+    {
+     
+        Time.timeScale = 1f;
+
+       
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+ public void volverAlMenu()
+{
+    Time.timeScale = 1f;
+    SceneManager.LoadScene("menuinicial");
+}
 }
