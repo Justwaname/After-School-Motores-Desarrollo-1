@@ -65,6 +65,7 @@ public class PadlockUI : MonoBehaviour
         padlockPanel.SetActive(false);
 
         onPanelClosed?.Invoke();
+        ClearDisplay();
     }
 
     // INTRODUCIR NÚMEROS
@@ -120,6 +121,7 @@ public class PadlockUI : MonoBehaviour
             Debug.Log("¡CANDADO DESBLOQUEADO!");
 
             onAccessGranted?.Invoke();
+            Invoke("ClosePanel", 1f); 
         }
         else
         {
