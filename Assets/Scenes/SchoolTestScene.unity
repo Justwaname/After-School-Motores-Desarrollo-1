@@ -1059,6 +1059,52 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -5053925668127403250, guid: 14927f79f0911b44984b082710a6e0a7, type: 3}
+--- !u!1 &218164458
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 218164459}
+  - component: {fileID: 218164460}
+  m_Layer: 0
+  m_Name: PadlockSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &218164459
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 218164458}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -7.580207, y: -93.09512, z: 503.1242}
+  m_LocalScale: {x: 0.66690844, y: 0.47105733, z: 3.5782688}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1408595511}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &218164460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 218164458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dc82490e5625de448bb92cd45f30af9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Padlock
+  codeLength: 4
+  generatedCode: 
 --- !u!1001 &241536292
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4686,12 +4732,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14858f5607c647e4b9a5afe76868a99e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PadlockUI
+  padlockPanel: {fileID: 0}
   displayText: {fileID: 316908730}
   maxDigits: 4
   onAccessGranted:
     m_PersistentCalls:
       m_Calls: []
   onAccessDenied:
+    m_PersistentCalls:
+      m_Calls: []
+  onPanelClosed:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &997245373
@@ -6465,6 +6515,7 @@ RectTransform:
   m_LocalScale: {x: 0.5566522, y: 0.88290566, z: 0.49636656}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 218164459}
   - {fileID: 1965976545}
   - {fileID: 183259187}
   - {fileID: 778046418}
@@ -11768,9 +11819,25 @@ PrefabInstance:
       value: 0.058823533
       objectReference: {fileID: 0}
     - target: {fileID: 824990067615454324, guid: d9bf3f0e3a6f77742b9a174457aaa6b1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 824990067615454324, guid: d9bf3f0e3a6f77742b9a174457aaa6b1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 824990067615454324, guid: d9bf3f0e3a6f77742b9a174457aaa6b1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 997245372}
+    - target: {fileID: 824990067615454324, guid: d9bf3f0e3a6f77742b9a174457aaa6b1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 824990067615454324, guid: d9bf3f0e3a6f77742b9a174457aaa6b1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: PadlockUI, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 824990067615454324, guid: d9bf3f0e3a6f77742b9a174457aaa6b1, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
       value: 1

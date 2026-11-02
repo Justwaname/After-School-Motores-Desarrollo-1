@@ -5,22 +5,78 @@ using UnityEngine.Events;
 public class PadlockUI : MonoBehaviour
 {
     [Header("Referencias UI")]
+    [SerializeField] private GameObject padlockPanel;
     [SerializeField] private TextMeshProUGUI displayText;
     [SerializeField] private int maxDigits = 4;
 
     [Header("Eventos")]
     public UnityEvent onAccessGranted;
     public UnityEvent onAccessDenied;
+    public UnityEvent onPanelClosed;
 
     private string currentInput = "";
+    private bool inputLocked = false;
 
-    void Start()
+    private void Start()
     {
+        if (displayText == null || padlockPanel == null)
+        {
+            Debug.LogError(
+                "Asigna Padlock Panel y Display Text en PadlockUI."
+            );
+            enabled = false;
+            return;
+        }
+
+        if (Padlock.Instance == null)
+        {
+            Debug.LogError("No existe Padlock en la escena.");
+            enabled = false;
+            return;
+        }
+
+        maxDigits = Padlock.Instance.CodeLength;
+
         ClearDisplay();
+        padlockPanel.SetActive(false);
     }
 
+    // ABRIR EL TECLADO
+    public void OpenPanel()
+    {
+        if (padlockPanel == null)
+            return;
+
+        ClearDisplay();
+        padlockPanel.SetActive(true);
+    }
+
+    // CERRAR EL TECLADO
+    public void ClosePanel()
+    {
+        if (padlockPanel == null || !padlockPanel.activeSelf)
+            return;
+
+        CancelInvoke(nameof(ClearDisplay));
+
+        currentInput = "";
+        inputLocked = false;
+
+        padlockPanel.SetActive(false);
+
+        onPanelClosed?.Invoke();
+    }
+
+    // INTRODUCIR NÚMEROS
     public void PressNumber(string number)
     {
+        if (inputLocked || string.IsNullOrEmpty(number))
+            return;
+
+        if (number.Length != 1 ||
+            number[0] < '0' || number[0] > '9')
+            return;
+
         if (currentInput.Length < maxDigits)
         {
             currentInput += number;
@@ -28,29 +84,53 @@ public class PadlockUI : MonoBehaviour
         }
     }
 
+    // LIMPIAR PANTALLA
     public void ClearDisplay()
     {
+        CancelInvoke(nameof(ClearDisplay));
+
         currentInput = "";
-        displayText.text = "----";
+        inputLocked = false;
+
+        if (displayText != null)
+        {
+            displayText.text = new string('-', maxDigits);
+        }
     }
 
+    // COMPROBAR CÓDIGO
     public void SubmitCode()
     {
-        if (currentInput.Length < maxDigits) return;
+        if (inputLocked || currentInput.Length != maxDigits)
+            return;
+
+        if (Padlock.Instance == null)
+        {
+            Debug.LogError("No existe Padlock.");
+            return;
+        }
 
         bool isCorrect = Padlock.Instance.VerifyCode(currentInput);
 
         if (isCorrect)
         {
             displayText.text = "OPEN";
+            inputLocked = true;
+
+            Debug.Log("¡CANDADO DESBLOQUEADO!");
+
             onAccessGranted?.Invoke();
         }
         else
         {
             displayText.text = "ERROR";
+            inputLocked = true;
+
+            Debug.Log("Código incorrecto.");
+
             onAccessDenied?.Invoke();
 
-            Invoke("ClearDisplay", 1f); // Limpia la pantalla
+            Invoke(nameof(ClearDisplay), 1f);
         }
     }
 }
