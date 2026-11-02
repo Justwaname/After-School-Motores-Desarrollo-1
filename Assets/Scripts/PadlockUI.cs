@@ -37,8 +37,7 @@ public class PadlockUI : MonoBehaviour
 
         maxDigits = Padlock.Instance.CodeLength;
 
-        ClearDisplay();
-        padlockPanel.SetActive(false);
+        
     }
 
     // ABRIR EL TECLADO

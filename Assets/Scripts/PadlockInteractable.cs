@@ -101,8 +101,9 @@ public class PadlockInteractable : InteractableObject
         panelAbierto = false;
     }
 
+    // Sobrescribimos el texto para que el UI del jugador lo lea correctamente
     public override string GetInteractText()
     {
-        return "E - Introducir código";
+        return gameObject.name + " [E] to unlock";
     }
 }
