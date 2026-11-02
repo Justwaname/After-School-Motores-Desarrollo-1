@@ -36,14 +36,32 @@ public class SphereCastInteractor : MonoBehaviour
         CheckForInteractable();
 
         // 2. Si se presiona la E y hay un objeto válido
-        if (playerInput != null && 
-            playerInput.actions["Interact"].WasPressedThisFrame() && 
+        if (playerInput != null &&
+            playerInput.actions["Interact"].WasPressedThisFrame() &&
             currentInteractable != null)
         {
             Debug.Log("E presionada: Interactuando con " + currentInteractable.gameObject.name);
+
+            // --- AQUÍ ACTIVAMOS LA ANIMACIÓN DESDE EL JUGADOR ---
+            PlayerController player = GetComponent<PlayerController>();
+            if (player != null)
+            {
+                player.LockMovement();
+
+                if (currentInteractable is ExitDoor)
+                {
+                    player.TriggerOpeningAnimation();
+                    player.Invoke("UnlockMovement", 1.9f); // Cambia 1.5f por lo que dure la animación de abrir
+                }
+                else
+                {
+                    player.TriggerInteractAnimation();
+                    player.Invoke("UnlockMovement", 1.3f); // Cambia 1.0f por lo que dure la animación de interactuar
+                }
+            }
             currentInteractable.Interact();
 
-            // Ocultamos la UI temporalmente o dejamos que se actualice sola en el siguiente frame
+            // Ocultamos la UI temporalmente
             if (interactText != null)
             {
                 interactText.gameObject.SetActive(false);
