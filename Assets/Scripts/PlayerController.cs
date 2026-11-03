@@ -32,6 +32,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float recoveryDelay = 0.7f;
     [SerializeField] private float rotationSpeed = 15f;
     [SerializeField] private Slider staminaSlider;
+    private Image staminaFillImage; // Referencia a la imagen de relleno de la barra
     private bool staminaDepleted = false;
 
     // =========================================================================
@@ -54,6 +55,18 @@ public class PlayerController : MonoBehaviour
         {
             staminaSlider.maxValue = maxStamina;
             staminaSlider.value = stamina;
+
+            // Obtenemos automáticamente el componente Image del hijo "Fill" del Slider
+            Transform fillArea = staminaSlider.transform.Find("Fill Area");
+            if (fillArea != null && fillArea.childCount > 0)
+            {
+                staminaFillImage = fillArea.GetChild(0).GetComponent<Image>();
+            }
+            else
+            {
+                // Si la estructura difiere, intentamos buscarlo directamente en los componentes hijos
+                staminaFillImage = staminaSlider.fillRect != null ? staminaSlider.fillRect.GetComponent<Image>() : null;
+            }
         }
     }
 
@@ -113,10 +126,16 @@ public class PlayerController : MonoBehaviour
             stamina = maxStamina;
             staminaDepleted = false;
         }
-        // --- ACTUALIZAR BARRA DE STAMINA EN UI ---
+
+        // --- ACTUALIZAR BARRA DE STAMINA EN UI Y SU TRANSPARENCIA ---
         if (staminaSlider != null)
         {
             staminaSlider.value = stamina;
+
+            if (staminaFillImage != null)
+            {
+                ColorBlockColorAlpha();
+            }
         }
 
         // --- ANIMATOR (Blend Tree 2D) ---
@@ -128,6 +147,19 @@ public class PlayerController : MonoBehaviour
 
         // --- AUDIO INTERACTIVO (Bloque F) ---
         GestionarAudioInteractivo();
+    }
+
+    // Método auxiliar para cambiar la opacidad (alfa) de la barra de stamina
+    private void ColorBlockColorAlpha()
+    {
+        Color currentColor = staminaFillImage.color;
+
+        // Si la stamina se agotó, bajamos el alpha a 0.3 (casi transparente). Si no, vuelve a 1.0 (completamente opaco).
+        float targetAlpha = staminaDepleted ? 0.3f : 1.0f;
+
+        // Cambiamos suavemente o de golpe el alfa manteniendo el color RGB original
+        currentColor.a = Mathf.MoveTowards(currentColor.a, targetAlpha, Time.deltaTime * 5f);
+        staminaFillImage.color = currentColor;
     }
 
     // =========================================================================

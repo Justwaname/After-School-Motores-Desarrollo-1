@@ -3,7 +3,67 @@ guid: f1a697a953f31d74fa68cde35e841653
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ALUMNIO_COM_PINTURA_ELETROSTTICA_BRANCA.001
+    second: {fileID: 2100000, guid: 407074c065f604f48993b84fef1e3465, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Aluminium.001
+    second: {fileID: 2100000, guid: 224616e75001c4f4397b53fdf854e776, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BMCD2AR3Solid_Materials_PlasticsTexturedGray_light.001
+    second: {fileID: 2100000, guid: 05fe816a3fcaa4b4db310dc070fdce43, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BMCD2AR3Solid_Materials_PlasticsTexturedOff_white.001
+    second: {fileID: 2100000, guid: 4e278865a87f2b64a87b5fa0c6e4b3bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BMCD2AR3Solid_Materials_PlasticsTexturedWhite.001
+    second: {fileID: 2100000, guid: 84754e20a5c01d0419805e4e91bfebae, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Blanco.001
+    second: {fileID: 2100000, guid: cb5b9d32548278445a9148e88f93587c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: FDE_Verde.001
+    second: {fileID: 2100000, guid: 4707edcb957ff5546a8a6d9ed2f44c90, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: GRANITO.001
+    second: {fileID: 2100000, guid: d6d7f84b8526e7240b9f63293ba511ba, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gray.001
+    second: {fileID: 2100000, guid: dc8126fa214862648977edaec18a7fb4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Textura Baldosa Piso patio n2
+    second: {fileID: 2100000, guid: de0f0a8dab67ad743aa9468d6d3875e7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: _CHAPISCO.001
+    second: {fileID: 2100000, guid: 09aff659dfbce8343ae13ffc7daaf734, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: _PASTILHA_CERMICA_PEI_4_BRANCA.001
+    second: {fileID: 2100000, guid: 894a55684c3aa954aa2da6538aaf8908, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

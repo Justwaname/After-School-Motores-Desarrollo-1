@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement; // <-- Necesario para reiniciar la escena
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -15,19 +15,39 @@ public class PlayerHealth : MonoBehaviour
 
     [Header("Efecto Visual (Viñeta Roja)")]
     [SerializeField] private Image damageVignetteImage;
+    [SerializeField] private float vignetteFadeSpeed = 3f;
+    private Coroutine vignetteFadeRoutine;
 
     [Header("Interfaz de Corazones (UI)")]
     [SerializeField] private Image[] heartImages;
     [SerializeField] private Sprite fullHeartSprite;
     [SerializeField] private Sprite emptyHeartSprite;
 
+    [Header("Animación de Corazones Llenos")]
+    [SerializeField] private float floatSpeed = 5f;    // Velocidad de subida y bajada
+    [SerializeField] private float floatHeight = 6f;   // Distancia en píxeles que se mueven
+    private Vector2[] heartOriginalPositions;          // Almacena las posiciones originales de los corazones
+
     [Header("Pantalla de Game Over")]
-    [SerializeField] private GameObject gameOverTextObj;   // Arrastra aquí tu GameOverText
-    [SerializeField] private GameObject restartButtonObj;  
-    [SerializeField] private GameObject MenuButtonobj;     
+    [SerializeField] private GameObject gameOverTextObj;
+    [SerializeField] private GameObject restartButtonObj;
+    [SerializeField] private GameObject MenuButtonobj;
+
     void Start()
     {
-        // Asegurar que la viñeta y los elementos de muerte comiencen ocultos
+        // Guardar las posiciones originales de los corazones en la UI
+        if (heartImages != null && heartImages.Length > 0)
+        {
+            heartOriginalPositions = new Vector2[heartImages.Length];
+            for (int i = 0; i < heartImages.Length; i++)
+            {
+                if (heartImages[i] != null)
+                {
+                    heartOriginalPositions[i] = heartImages[i].rectTransform.anchoredPosition;
+                }
+            }
+        }
+
         if (damageVignetteImage != null)
         {
             Color c = damageVignetteImage.color;
@@ -36,9 +56,15 @@ public class PlayerHealth : MonoBehaviour
         }
 
         if (gameOverTextObj) gameOverTextObj.SetActive(false);
-        if (restartButtonObj ) restartButtonObj.SetActive(false);
-        if (MenuButtonobj ) MenuButtonobj.SetActive(false);
+        if (restartButtonObj) restartButtonObj.SetActive(false);
+        if (MenuButtonobj) MenuButtonobj.SetActive(false);
         ActualizarCorazonesUI();
+    }
+
+    void Update()
+    {
+        // Animamos los corazones en tiempo real
+        AnimarCorazonesLlenos();
     }
 
     public void TakeDamage()
@@ -47,7 +73,7 @@ public class PlayerHealth : MonoBehaviour
 
         currentHits++;
 
-        ActualizarEfectoVisual();
+        ActualizarEfectoVisualAlRecibirGolpe();
         ActualizarCorazonesUI();
 
         if (currentHits >= maxHits)
@@ -60,19 +86,46 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    private void ActualizarEfectoVisual()
+    private void ActualizarEfectoVisualAlRecibirGolpe()
     {
-        if (damageVignetteImage != null)
+        if (damageVignetteImage == null) return;
+
+        if (vignetteFadeRoutine != null)
         {
-            Color c = damageVignetteImage.color;
-
-           
-            if (currentHits == 1) c.a = 0.2f;
-            else if (currentHits == 2) c.a = 0.5f;
-            else if (currentHits >= 3) c.a = 1.0f;
-
-            damageVignetteImage.color = c;
+            StopCoroutine(vignetteFadeRoutine);
         }
+
+        Color c = damageVignetteImage.color;
+
+        if (currentHits == 1) c.a = 0.3f;
+        else if (currentHits == 2) c.a = 0.4f;
+
+        damageVignetteImage.color = c;
+
+        vignetteFadeRoutine = StartCoroutine(FadeVignetteRoutine());
+    }
+
+    private IEnumerator FadeVignetteRoutine()
+    {
+        yield return new WaitForSeconds(0.6f);
+
+        Color c = damageVignetteImage.color;
+        float targetAlpha = 0f;
+
+        if (currentHits == 2)
+        {
+            targetAlpha = 0.05f;
+        }
+
+        while (Mathf.Abs(c.a - targetAlpha) > 0.01f)
+        {
+            c.a = Mathf.MoveTowards(c.a, targetAlpha, Time.deltaTime * vignetteFadeSpeed);
+            damageVignetteImage.color = c;
+            yield return null;
+        }
+
+        c.a = targetAlpha;
+        damageVignetteImage.color = c;
     }
 
     private void ActualizarCorazonesUI()
@@ -86,11 +139,37 @@ public class PlayerHealth : MonoBehaviour
                 if (i < currentHits)
                 {
                     heartImages[i].sprite = emptyHeartSprite;
+
+                    // Si se vuelve vacío, lo devolvemos inmediatamente a su posición original exacta
+                    if (heartOriginalPositions != null)
+                    {
+                        heartImages[i].rectTransform.anchoredPosition = heartOriginalPositions[i];
+                    }
                 }
                 else
                 {
                     heartImages[i].sprite = fullHeartSprite;
                 }
+            }
+        }
+    }
+
+    private void AnimarCorazonesLlenos()
+    {
+        if (heartImages == null || heartOriginalPositions == null) return;
+
+        for (int i = 0; i < heartImages.Length; i++)
+        {
+            // Solo animamos los corazones que están llenos (índice mayor o igual a currentHits)
+            if (heartImages[i] != null && i >= currentHits)
+            {
+                // Usamos Mathf.Sin para crear un movimiento de flotación suave vertical
+                float offsetY = Mathf.Sin(Time.time * floatSpeed + i) * floatHeight;
+
+                Vector2 newPos = heartOriginalPositions[i];
+                newPos.y += offsetY;
+
+                heartImages[i].rectTransform.anchoredPosition = newPos;
             }
         }
     }
@@ -106,26 +185,28 @@ public class PlayerHealth : MonoBehaviour
     {
         Debug.Log("El jugador ha muerto tras recibir 3 golpes.");
 
-        
+        if (damageVignetteImage != null)
+        {
+            Color c = damageVignetteImage.color;
+            c.a = 1.0f;
+            damageVignetteImage.color = c;
+        }
+
         if (gameOverTextObj != null) gameOverTextObj.SetActive(true);
         if (restartButtonObj != null) restartButtonObj.SetActive(true);
         if (MenuButtonobj != null) MenuButtonobj.SetActive(true);
         Time.timeScale = 0f;
     }
 
-    
     public void ReiniciarJuego()
     {
-     
         Time.timeScale = 1f;
-
-       
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
- public void volverAlMenu()
-{
-    Time.timeScale = 1f;
-    SceneManager.LoadScene("menuinicial");
-}
+    public void volverAlMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("menuinicial");
+    }
 }
