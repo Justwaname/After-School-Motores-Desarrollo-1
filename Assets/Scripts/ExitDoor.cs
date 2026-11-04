@@ -5,6 +5,12 @@ public class ExitDoor : InteractableObject
     public float anguloApertura = 90f;
     public float velocidadApertura = 2f;
 
+    [Header("Puerta Gemela")]
+    [Tooltip("Arrastra aquí el script ExitDoor de la otra hoja de la puerta.")]
+    public ExitDoor otraPuerta;
+    [Tooltip("Marcar solo si esta hoja debe girar en dirección contraria a la otra.")]
+    public bool invertirDireccion = false;
+
     private bool puertaAbierta = false;
 
     private Quaternion rotacionCerrada;
@@ -14,9 +20,12 @@ public class ExitDoor : InteractableObject
     {
         rotacionCerrada = transform.localRotation;
 
+        // Si esta puerta invierte la dirección, multiplicamos el ángulo por -1
+        float anguloFinal = invertirDireccion ? -anguloApertura : anguloApertura;
+
         rotacionAbierta =
             rotacionCerrada *
-            Quaternion.Euler(0f, anguloApertura, 0f);
+            Quaternion.Euler(0f, anguloFinal, 0f);
     }
 
     private void Update()
@@ -30,6 +39,7 @@ public class ExitDoor : InteractableObject
             );
         }
     }
+
     public override void Interact()
     {
         if (puertaAbierta)
@@ -53,18 +63,18 @@ public class ExitDoor : InteractableObject
 
             Debug.Log("¡PUERTA ABIERTA!");
             GameManager.Instance.ShowNotification("¡PUERTA ABIERTA!");
-            
+
             if (Inventory.Instance != null)
             {
                 Inventory.Instance.RemoveItem(Inventory.Instance.GetFinalItem());
                 Inventory.Instance.RemoveItem(Inventory.Instance.GetBlowtorch());
             }
 
-            puertaAbierta = true;
+            // Abrir esta puerta y ordenar a la otra que también se abra (evitando bucles infinitos)
+            AbrirPuertaRemota();
         }
         else
         {
-            // Verificamos si al menos tiene los ingredientes para mostrarle un mensaje más descriptivo si se desea
             if (Inventory.Instance != null &&
                 Inventory.Instance.HasItem(Inventory.Instance.GetMagnesiumRibbon()) &&
                 Inventory.Instance.HasItem(Inventory.Instance.GetThermite()))
@@ -78,6 +88,20 @@ public class ExitDoor : InteractableObject
         }
     }
 
+    // Método público para abrir esta hoja de forma directa (llamado por la otra puerta o al cumplir la condición)
+    public void AbrirPuertaRemota()
+    {
+        if (puertaAbierta) return;
+
+        puertaAbierta = true;
+
+        // Si tiene una puerta gemela asignada y todavía no está abierta, la abre también
+        if (otraPuerta != null && !otraPuerta.puertaAbierta)
+        {
+            otraPuerta.AbrirPuertaRemota();
+        }
+    }
+
     public override string GetInteractText()
     {
         if (GameManager.Instance != null && GameManager.Instance.CanEscape())
@@ -85,20 +109,17 @@ public class ExitDoor : InteractableObject
             return "Salida [E] para Escapar";
         }
 
-        // Comprobamos el estado del inventario para cambiar el texto del prompt dinámicamente
         if (Inventory.Instance != null)
         {
             bool hasMagnesium = Inventory.Instance.HasItem(Inventory.Instance.GetMagnesiumRibbon());
             bool hasThermite = Inventory.Instance.HasItem(Inventory.Instance.GetThermite());
 
-            // Si ya tiene los dos componentes de las piezas en el inventario pero no los ha combinado / falta el soplete
             if (hasMagnesium && hasThermite)
             {
                 return "¿Seguro que tienes todo? [E]";
             }
         }
 
-        // Si no cumple lo anterior, muestra que tiene un candado
         return "Salida [Locked]";
     }
 }

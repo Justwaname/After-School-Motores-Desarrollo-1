@@ -15,8 +15,12 @@ public class PadlockInteractable : InteractableObject
 
     private bool panelAbierto = false;
 
-    private void Awake()
+    // IMPORTANTE: Sobrescribimos el Awake pero llamamos a base.Awake() 
+    // para que la clase padre active el pulso o el outline automático.
+    protected override void Awake()
     {
+        base.Awake(); // <-- Esto activa la corrutina de brillo/outline heredada
+
         if (padlockUI != null)
         {
             padlockUI.onPanelClosed.AddListener(OnPanelClosed);
@@ -101,7 +105,6 @@ public class PadlockInteractable : InteractableObject
         panelAbierto = false;
     }
 
-    // Sobrescribimos el texto para que el UI del jugador lo lea correctamente
     public override string GetInteractText()
     {
         return gameObject.name + " [E] to unlock";
