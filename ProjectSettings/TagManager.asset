@@ -16,8 +16,8 @@ TagManager:
   - interactable
   - Water
   - UI
-  - 
-  - 
+  - Walkable
+  - Not Walkable
   - 
   - 
   - 

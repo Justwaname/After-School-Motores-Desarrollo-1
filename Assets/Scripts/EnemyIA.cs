@@ -1,21 +1,35 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-public class NewMonoBehaviourScript : MonoBehaviour
+public class EnemyIA : MonoBehaviour
 {
-    [Header("Patrullaje")]
-    public int rutina;
-    public float cronometro;
+    [Header("Patrullaje por Pasillos")]
+    [SerializeField] private Transform[] waypoints;
+    private int currentWaypointIndex = 0;
+    [SerializeField] private float waitTimeAtWaypoint = 2f;
+    private float waitTimer = 0f;
+    private bool waitingAtPoint = false;
+
+    [Header("Animator y Componentes")]
     public Animator ani;
-    public Quaternion angulo;
-    public float grado;
+    private NavMeshAgent agent;
 
     [Header("Jugador")]
     public GameObject target;
     public bool atacando;
 
-    [Header("Distancias")]
-    public float distanciaDeteccion = 5f;
-    public float distanciaAtaque = 1f;
+    [Header("Distancias y Velocidades")]
+    public float distanciaDeteccion = 9.5f;
+    public float distanciaAtaque = 1.5f;
+    [SerializeField] private float walkSpeed = 5f;
+    [SerializeField] private float runSpeed = 7f;
+    [SerializeField] private float attackCooldown = 1.5f;
+    private float attackTimer = 0f;
+
+    [Header("Memoria de Persecución")]
+    [SerializeField] private float loseTargetDelay = 6f;
+    private float lossTimer = 0f;
+    private bool isChasingLostTarget = false;
 
     [Header("Audio de pasos")]
     [SerializeField] private float walkFootstepInterval = 0.55f;
@@ -23,23 +37,24 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private float footstepTimer;
     private PlayerHideController playerHideController;
+    private bool wasHiddenLastFrame = false;
 
     void Start()
     {
-        ani = GetComponent<Animator>();
+        ani = GetComponentInChildren<Animator>();
+        agent = GetComponent<NavMeshAgent>();
         target = GameObject.Find("Player");
 
         if (target != null)
         {
-            playerHideController =
-                target.GetComponent<PlayerHideController>();
+            playerHideController = target.GetComponent<PlayerHideController>();
         }
         else
         {
-            Debug.LogError(
-                "No se encontró al jugador. Debe llamarse Player."
-            );
+            Debug.LogError("No se encontró al jugador. Debe llamarse Player.");
         }
+
+        SiguientePuntoPatrulla();
     }
 
     void Update()
@@ -47,12 +62,26 @@ public class NewMonoBehaviourScript : MonoBehaviour
         if (target == null)
             return;
 
-        if (playerHideController != null &&
-            playerHideController.IsHidden)
+        if (attackTimer > 0)
         {
-            DetenerEnemigo();
+            attackTimer -= Time.deltaTime;
+        }
+
+        bool isHiddenNow = (playerHideController != null && playerHideController.IsHidden);
+
+        // Detectamos el preciso instante en que el jugador se esconde
+        if (isHiddenNow && !wasHiddenLastFrame)
+        {
+            isChasingLostTarget = false;
+            lossTimer = 0f;
+            SiguientePuntoPatrulla();
+        }
+
+        wasHiddenLastFrame = isHiddenNow;
+
+        if (isHiddenNow)
+        {
             footstepTimer = 0f;
-            return;
         }
 
         Comportamiento_Enemigo();
@@ -61,6 +90,9 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
     private void DetenerEnemigo()
     {
+        if (agent != null && agent.isOnNavMesh)
+            agent.isStopped = true;
+
         if (ani != null)
         {
             ani.SetBool("walk", false);
@@ -69,6 +101,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
         }
 
         atacando = false;
+        isChasingLostTarget = false;
     }
 
     public void Comportamiento_Enemigo()
@@ -76,73 +109,49 @@ public class NewMonoBehaviourScript : MonoBehaviour
         if (target == null)
             return;
 
-        float distancia = Vector3.Distance(
-            transform.position,
-            target.transform.position
-        );
+        bool jugadorInvisible = (playerHideController != null && playerHideController.IsHidden);
 
-        // PATRULLAJE
-        if (distancia > distanciaDeteccion)
+        float distancia = Vector3.Distance(transform.position, target.transform.position);
+
+        if (atacando)
+            return;
+
+        // 1. ATAQUE (Solo si no está escondido)
+        if (!jugadorInvisible && distancia <= distanciaAtaque)
         {
-            if (ani != null)
-                ani.SetBool("run", false);
+            lossTimer = 0f;
+            isChasingLostTarget = false;
 
-            cronometro += Time.deltaTime;
+            if (agent.isOnNavMesh)
+                agent.isStopped = true;
 
-            if (cronometro >= 4f)
+            Vector3 direccionJugador = (target.transform.position - transform.position).normalized;
+            direccionJugador.y = 0;
+            if (direccionJugador != Vector3.zero)
             {
-                rutina = Random.Range(0, 2);
-                cronometro = 0f;
+                transform.rotation = Quaternion.LookRotation(direccionJugador);
             }
 
-            switch (rutina)
+            if (attackTimer <= 0)
             {
-                case 0:
-                    if (ani != null)
-                        ani.SetBool("walk", false);
-                    break;
-
-                case 1:
-                    grado = Random.Range(0f, 360f);
-                    angulo = Quaternion.Euler(0f, grado, 0f);
-                    rutina = 2;
-                    break;
-
-                case 2:
-                    transform.rotation = Quaternion.RotateTowards(
-                        transform.rotation,
-                        angulo,
-                        90f * Time.deltaTime
-                    );
-
-                    transform.Translate(
-                        Vector3.forward * Time.deltaTime,
-                        Space.Self
-                    );
-
-                    if (ani != null)
-                        ani.SetBool("walk", true);
-                    break;
+                AtacarJugador();
+                attackTimer = attackCooldown;
             }
+            return;
         }
-        // PERSECUCIÓN
-        else if (distancia > distanciaAtaque)
+
+        // 2. PERSECUCIÓN DIRECTA (Solo si no está escondido)
+        if (!jugadorInvisible && distancia <= distanciaDeteccion)
         {
-            Vector3 direccion =
-                target.transform.position - transform.position;
+            lossTimer = loseTargetDelay;
+            isChasingLostTarget = true;
+            waitingAtPoint = false;
 
-            direccion.y = 0f;
-
-            if (direccion.sqrMagnitude > 0.001f)
+            if (agent.isOnNavMesh)
             {
-                Quaternion rotacion =
-                    Quaternion.LookRotation(direccion);
-
-                transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation,
-                    rotacion,
-                    180f * Time.deltaTime
-                );
+                agent.isStopped = false;
+                agent.speed = Mathf.MoveTowards(agent.speed, runSpeed, Time.deltaTime);
+                agent.SetDestination(target.transform.position);
             }
 
             if (ani != null)
@@ -151,39 +160,112 @@ public class NewMonoBehaviourScript : MonoBehaviour
                 ani.SetBool("run", true);
                 ani.SetBool("attack", false);
             }
-
-            atacando = false;
-
-            transform.Translate(
-                Vector3.forward * 2f * Time.deltaTime,
-                Space.Self
-            );
+            return;
         }
-        // ATAQUE
+
+        // 3. PERSECUCIÓN POR MEMORIA
+        if (isChasingLostTarget && !jugadorInvisible)
+        {
+            lossTimer -= Time.deltaTime;
+
+            if (lossTimer > 0)
+            {
+                if (agent.isOnNavMesh)
+                {
+                    agent.isStopped = false;
+                    agent.speed = Mathf.MoveTowards(agent.speed, runSpeed, Time.deltaTime);
+                    agent.SetDestination(target.transform.position);
+                }
+
+                if (ani != null)
+                {
+                    ani.SetBool("walk", false);
+                    ani.SetBool("run", true);
+                    ani.SetBool("attack", false);
+                }
+                return;
+            }
+            else
+            {
+                isChasingLostTarget = false;
+                SiguientePuntoPatrulla();
+            }
+        }
+
+        // 4. PATRULLAJE POR PASILLOS
+        if (waypoints == null || waypoints.Length == 0)
+        {
+            return;
+        }
+
+        if (agent.isOnNavMesh)
+            agent.isStopped = false;
+
+        agent.speed = walkSpeed;
+
+        if (waitingAtPoint)
+        {
+            if (ani != null)
+                ani.SetBool("walk", false);
+
+            waitTimer += Time.deltaTime;
+            if (waitTimer >= waitTimeAtWaypoint)
+            {
+                waitingAtPoint = false;
+                SiguientePuntoPatrulla();
+            }
+        }
         else
         {
-            if (!atacando &&
-                HorrorSFXManager.Instance != null)
-            {
-                HorrorSFXManager.Instance.PlaySFX(
-                    HorrorSFXEvent.EnemyAttack,
-                    transform.position
-                );
-            }
-            PlayerHealth playerHealth = target.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage();
-            }
-        
-        if (ani != null)
-            {
-                ani.SetBool("walk", false);
-                ani.SetBool("run", false);
-                ani.SetBool("attack", true);
-            }
+            if (ani != null)
+                ani.SetBool("walk", agent.velocity.sqrMagnitude > 0.1f);
 
-            atacando = true;
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+            {
+                waitingAtPoint = true;
+                waitTimer = 0f;
+            }
+        }
+    }
+
+    public bool EstaEnPeriodoDeGracia(float segundosMinimos)
+    {
+        if (!isChasingLostTarget) return false;
+        float tiempoTranscurrido = loseTargetDelay - lossTimer;
+        return tiempoTranscurrido < segundosMinimos;
+    }
+
+    private void SiguientePuntoPatrulla()
+    {
+        if (waypoints.Length == 0 || waypoints[currentWaypointIndex] == null) return;
+
+        agent.SetDestination(waypoints[currentWaypointIndex].position);
+        currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
+    }
+
+    private void AtacarJugador()
+    {
+        atacando = true;
+
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.EnemyAttack,
+                transform.position
+            );
+        }
+
+        PlayerHealth playerHealth = target.GetComponent<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage();
+        }
+
+        if (ani != null)
+        {
+            ani.SetBool("walk", false);
+            ani.SetBool("run", false);
+            ani.SetBool("attack", true);
         }
     }
 
@@ -203,9 +285,7 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         footstepTimer += Time.deltaTime;
 
-        float interval = running
-            ? runFootstepInterval
-            : walkFootstepInterval;
+        float interval = running ? runFootstepInterval : walkFootstepInterval;
 
         if (footstepTimer >= interval)
         {
@@ -229,4 +309,3 @@ public class NewMonoBehaviourScript : MonoBehaviour
         atacando = false;
     }
 }
-

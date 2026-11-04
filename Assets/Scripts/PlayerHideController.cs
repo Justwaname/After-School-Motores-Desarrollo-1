@@ -4,8 +4,10 @@ using UnityEngine.UI;
 
 public class PlayerHideController : MonoBehaviour
 {
-    [Header("Transición de pantalla")]
-    [SerializeField] private CanvasGroup transitionCanvasGroup;
+    [Header("Transición de pantalla (Arrastra tu Panel/Imagen aquí)")]
+    [SerializeField] private Image transitionImage;
+    private CanvasGroup transitionCanvasGroup;
+
     [SerializeField] private float fadeDuration = 0.4f;
     [SerializeField] private float blackScreenDuration = 1.5f;
 
@@ -23,11 +25,13 @@ public class PlayerHideController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         playerController = GetComponent<PlayerController>();
 
-        // Si no asignamos una pantalla negra desde el Inspector,
-        // la creamos automáticamente.
-        if (transitionCanvasGroup == null)
+        if (transitionImage != null)
         {
-            CreateFadeOverlay();
+            transitionCanvasGroup = transitionImage.GetComponent<CanvasGroup>();
+            if (transitionCanvasGroup == null)
+            {
+                transitionCanvasGroup = transitionImage.gameObject.AddComponent<CanvasGroup>();
+            }
         }
 
         if (transitionCanvasGroup != null)
@@ -205,49 +209,6 @@ public class PlayerHideController : MonoBehaviour
         }
 
         transitionCanvasGroup.alpha = targetAlpha;
-    }
-
-    // CREAR AUTOMÁTICAMENTE LA PANTALLA NEGRA
-    private void CreateFadeOverlay()
-    {
-        GameObject canvasObject = new GameObject(
-            "LockerTransitionCanvas",
-            typeof(RectTransform),
-            typeof(Canvas),
-            typeof(CanvasScaler),
-            typeof(GraphicRaycaster)
-        );
-
-        Canvas canvas = canvasObject.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 32767;
-
-        CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-
-        GameObject panel = new GameObject(
-            "BlackFade",
-            typeof(RectTransform),
-            typeof(CanvasGroup),
-            typeof(Image)
-        );
-
-        panel.transform.SetParent(canvasObject.transform, false);
-
-        RectTransform rect = panel.GetComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-
-        Image image = panel.GetComponent<Image>();
-        image.color = Color.black;
-        image.raycastTarget = false;
-
-        transitionCanvasGroup = panel.GetComponent<CanvasGroup>();
-        transitionCanvasGroup.alpha = 0f;
-        transitionCanvasGroup.interactable = false;
-        transitionCanvasGroup.blocksRaycasts = false;
     }
 
     private void OnDestroy()

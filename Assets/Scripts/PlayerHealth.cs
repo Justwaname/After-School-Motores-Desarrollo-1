@@ -13,6 +13,10 @@ public class PlayerHealth : MonoBehaviour
     [Header("Inmunidad y Velocidad Temporal")]
     [SerializeField] private float invulnerabilityDuration = 1.5f;
 
+    [Header("Recuperación de Vida")]
+    [SerializeField] private float healCooldown = 50f; // Segundos necesarios para recuperar un corazón
+    private float timeSinceLastDamage = 0f;
+
     [Header("Efecto Visual (Viñeta Roja)")]
     [SerializeField] private Image damageVignetteImage;
     [SerializeField] private float vignetteFadeSpeed = 3f;
@@ -65,6 +69,18 @@ public class PlayerHealth : MonoBehaviour
     {
         // Animamos los corazones en tiempo real
         AnimarCorazonesLlenos();
+
+        // Control de recuperación de vida tras 50 segundos sin recibir daño
+        if (currentHits > 0)
+        {
+            timeSinceLastDamage += Time.deltaTime;
+
+            if (timeSinceLastDamage >= healCooldown)
+            {
+                CurarCorazon();
+                timeSinceLastDamage = 0f; // Reiniciamos el cronómetro
+            }
+        }
     }
 
     public void TakeDamage()
@@ -72,6 +88,7 @@ public class PlayerHealth : MonoBehaviour
         if (isInvulnerable || currentHits >= maxHits) return;
 
         currentHits++;
+        timeSinceLastDamage = 0f; // Reiniciamos el temporizador al recibir daño
 
         ActualizarEfectoVisualAlRecibirGolpe();
         ActualizarCorazonesUI();
@@ -83,6 +100,16 @@ public class PlayerHealth : MonoBehaviour
         else
         {
             StartCoroutine(DamageRoutine());
+        }
+    }
+
+    private void CurarCorazon()
+    {
+        if (currentHits > 0)
+        {
+            currentHits--; // Restamos un golpe (recupera 1 corazón)
+            ActualizarCorazonesUI();
+            Debug.Log("¡Has sobrevivido el tiempo suficiente! Has recuperado 1 corazón.");
         }
     }
 
@@ -188,7 +215,7 @@ public class PlayerHealth : MonoBehaviour
         if (damageVignetteImage != null)
         {
             Color c = damageVignetteImage.color;
-            c.a = 1.0f;
+            c.a = .0f;
             damageVignetteImage.color = c;
         }
 

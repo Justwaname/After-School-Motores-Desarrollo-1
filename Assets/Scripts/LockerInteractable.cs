@@ -6,6 +6,9 @@ public class LockerInteractable : InteractableObject
     [SerializeField] private Transform hidePoint;
     [SerializeField] private Transform exitPoint;
 
+    [Header("Configuración de Sigilo")]
+    [SerializeField] private float segundosEsperaPersecucion = 4f; // <--- Segundos exactos que defines tú
+
     [Header("Animación de la taquilla")]
     [SerializeField] private Animator lockerAnimator;
     [SerializeField] private string openTrigger = "Open";
@@ -26,7 +29,36 @@ public class LockerInteractable : InteractableObject
             return;
         }
 
+        if (EstaElEnemigoMuyCercaOPersiguiendo())
+        {
+            Debug.Log("¡El enemigo te vio o está muy cerca, debes esperar a despistarlo!");
+            return;
+        }
+
         player.TryEnterHide(this);
+    }
+
+    private bool EstaElEnemigoMuyCercaOPersiguiendo()
+    {
+        EnemyIA enemigo = Object.FindFirstObjectByType<EnemyIA>();
+
+        if (enemigo == null || enemigo.target == null) return false;
+
+        float distanciaAlJugador = Vector3.Distance(enemigo.transform.position, enemigo.target.transform.position);
+
+        // 1. Si el enemigo está en rango de visión directo o atacando, bloqueamos al instante
+        if (distanciaAlJugador <= enemigo.distanciaDeteccion || enemigo.atacando)
+        {
+            return true;
+        }
+
+        // 2. Comprobamos el periodo de gracia directamente desde la IA del enemigo usando tus segundos
+        if (enemigo.EstaEnPeriodoDeGracia(segundosEsperaPersecucion))
+        {
+            return true; // Todavía está en el tiempo de gracia, no puedes esconderte
+        }
+
+        return false;
     }
 
     public bool TryOccupy(PlayerHideController player)
@@ -75,6 +107,9 @@ public class LockerInteractable : InteractableObject
     {
         if (occupant != null)
             return "Taquilla ocupada";
+
+        if (EstaElEnemigoMuyCercaOPersiguiendo())
+            return "¡El enemigo te vigila, espera a despistarlo!";
 
         return "E - Esconderse";
     }
