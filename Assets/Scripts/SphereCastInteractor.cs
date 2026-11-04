@@ -11,119 +11,177 @@ public class SphereCastInteractor : MonoBehaviour
     [SerializeField] private TextMeshProUGUI interactText;
 
     private PlayerInput playerInput;
-    private InteractableObject currentInteractable;
+    private InputAction interactAction;
 
-    // --- INICIALIZACIÓN ---
+    private InteractableObject currentInteractable;
+    private PlayerHideController hideController;
+
     private void Start()
     {
         playerInput = GetComponent<PlayerInput>();
+        hideController = GetComponent<PlayerHideController>();
 
         if (playerInput == null)
         {
             Debug.LogError("No se encontró PlayerInput en el Player.");
         }
-
-        if (interactText != null)
+        else
         {
-            interactText.gameObject.SetActive(false);
+            interactAction = playerInput.actions.FindAction("Interact", false);
+
+            if (interactAction == null)
+            {
+                Debug.LogError("No se encontró la acción Interact.");
+            }
         }
+
+        if (hideController == null)
+        {
+            Debug.LogError("No se encontró PlayerHideController en el Player.");
+        }
+
+        HideInteractText();
     }
 
-    // --- LÓGICA PRINCIPAL ---
     private void Update()
     {
-        // 1. Buscamos en cada frame si hay un interactuable para actualizar la UI
-        CheckForInteractable();
+        bool pressedE = interactAction != null &&
+                        interactAction.WasPressedThisFrame();
 
-        // 2. Si se presiona la E y hay un objeto válido
-        if (playerInput != null &&
-            playerInput.actions["Interact"].WasPressedThisFrame() &&
-            currentInteractable != null)
+        // Si está ocurriendo una transición, no permitir interacciones.
+        if (hideController != null && hideController.IsTransitioning)
         {
-            Debug.Log("E presionada: Interactuando con " + currentInteractable.gameObject.name);
+            currentInteractable = null;
+            HideInteractText();
+            return;
+        }
 
-            // --- AQUÍ ACTIVAMOS LA ANIMACIÓN DESDE EL JUGADOR ---
-            PlayerController player = GetComponent<PlayerController>();
-            if (player != null)
-            {
-                player.LockMovement();
+        // SI ESTÁ ESCONDIDO
+        if (hideController != null && hideController.IsHidden)
+        {
+            currentInteractable = null;
 
-                if (currentInteractable is ExitDoor)
-                {
-                    player.TriggerOpeningAnimation();
-                    player.Invoke("UnlockMovement", 1.9f); // Cambia 1.5f por lo que dure la animación de abrir
-                }
-                else
-                {
-                    player.TriggerInteractAnimation();
-                    player.Invoke("UnlockMovement", 1.3f); // Cambia 1.0f por lo que dure la animación de interactuar
-                }
-            }
-            currentInteractable.Interact();
-
-            // Ocultamos la UI temporalmente
             if (interactText != null)
             {
-                interactText.gameObject.SetActive(false);
+                interactText.text = "E - Salir de la taquilla";
+                interactText.gameObject.SetActive(true);
             }
+
+            if (pressedE)
+            {
+                hideController.TryExitHide();
+                HideInteractText();
+            }
+
+            return;
+        }
+
+        // SI NO ESTÁ ESCONDIDO
+        CheckForInteractable();
+
+        if (pressedE && currentInteractable != null)
+        {
+            Debug.Log(
+                "E presionada: Interactuando con " +
+                currentInteractable.gameObject.name
+            );
+
+            // No ejecutar animaciones al entrar en una taquilla.
+            if (!(currentInteractable is LockerInteractable))
+            {
+                PlayerController player = GetComponent<PlayerController>();
+
+                if (player != null)
+                {
+                    player.LockMovement();
+
+                    if (currentInteractable is ExitDoor)
+                    {
+                        player.TriggerOpeningAnimation();
+                        player.Invoke("UnlockMovement", 1.9f);
+                    }
+                    else
+                    {
+                        player.TriggerInteractAnimation();
+                        player.Invoke("UnlockMovement", 1.3f);
+                    }
+                }
+            }
+
+            currentInteractable.Interact();
+
+            HideInteractText();
         }
     }
 
-    // --- DETECCIÓN DE OBJETOS ---
     private void CheckForInteractable()
     {
         Vector3 origin = transform.position;
         Vector3 direction = transform.forward;
+
         Collider hitCollider = null;
 
-        // --- DETECCIÓN CERCANA (OverlapSphere) ---
-        Collider[] overlappingColliders = Physics.OverlapSphere(origin, interactRadius, interactableLayer);
+        Collider[] overlappingColliders = Physics.OverlapSphere(
+            origin,
+            interactRadius,
+            interactableLayer
+        );
 
         if (overlappingColliders.Length > 0)
         {
             hitCollider = overlappingColliders[0];
         }
-        // --- DETECCIÓN HACIA ADELANTE (SphereCast) ---
-        else if (Physics.SphereCast(origin, interactRadius, direction, out RaycastHit hitInfo, interactDistance, interactableLayer))
+        else if (Physics.SphereCast(
+            origin,
+            interactRadius,
+            direction,
+            out RaycastHit hitInfo,
+            interactDistance,
+            interactableLayer))
         {
             hitCollider = hitInfo.collider;
         }
 
-        // --- COMPROBAR OBJETO INTERACTUABLE ---
         if (hitCollider != null)
         {
-            // Usamos GetComponentInParent por si el collider está en un hijo y el script en el padre
-            InteractableObject interactable = hitCollider.GetComponentInParent<InteractableObject>();
+            InteractableObject interactable =
+                hitCollider.GetComponentInParent<InteractableObject>();
 
             if (interactable != null)
             {
                 currentInteractable = interactable;
 
-                // --- MOSTRAR UI ---
                 if (interactText != null)
                 {
-                    interactText.text = currentInteractable.GetInteractText();
+                    interactText.text =
+                        currentInteractable.GetInteractText();
+
                     interactText.gameObject.SetActive(true);
                 }
+
                 return;
             }
         }
 
-        // Si no hay nada al alcance, reseteamos la referencia y ocultamos la UI
         currentInteractable = null;
+        HideInteractText();
+    }
+
+    private void HideInteractText()
+    {
         if (interactText != null)
         {
             interactText.gameObject.SetActive(false);
         }
     }
 
-    // --- VISUALIZACIÓN DEL GIZMO ---
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, interactRadius);
 
-        Vector3 endPosition = transform.position + (transform.forward * interactDistance);
+        Vector3 endPosition =
+            transform.position + transform.forward * interactDistance;
 
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(endPosition, interactRadius);

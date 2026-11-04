@@ -1,259 +1,260 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerHideController : MonoBehaviour
 {
-    [Header("Animación del jugador")]
-    [SerializeField] private Animator playerAnimator;
-    [SerializeField] private string enterHideTrigger = "EnterHide";
-    [SerializeField] private string exitHideTrigger = "ExitHide";
+    [Header("Transición de pantalla")]
+    [SerializeField] private CanvasGroup transitionCanvasGroup;
+    [SerializeField] private float fadeDuration = 0.4f;
+    [SerializeField] private float blackScreenDuration = 1.5f;
 
-    [Header("Duración de animaciones")]
-    [SerializeField] private float enterAnimationDuration = 0.8f;
-    [SerializeField] private float exitAnimationDuration = 0.8f;
-    [SerializeField] private float doorOpenDelay = 0.25f;
+    private LockerInteractable currentLocker;
+    private Rigidbody rb;
+    private PlayerController playerController;
+
+    private RigidbodyConstraints originalConstraints;
 
     public bool IsHidden { get; private set; }
     public bool IsTransitioning { get; private set; }
 
-    private PlayerController playerController;
-    private Rigidbody rb;
-
-    private LockerInteractable currentLocker;
-    private Transform hidePoint;
-    private Transform exitPoint;
-
-    private bool previousKinematic;
-    private bool previousControllerEnabled;
-
-    private Collider[] playerColliders;
-    private bool[] originalColliderStates;
-
-    private Renderer[] playerRenderers;
-    private bool[] originalRendererStates;
-
     private void Awake()
     {
-        playerController = GetComponent<PlayerController>();
         rb = GetComponent<Rigidbody>();
+        playerController = GetComponent<PlayerController>();
 
-        if (playerAnimator == null)
+        // Si no asignamos una pantalla negra desde el Inspector,
+        // la creamos automáticamente.
+        if (transitionCanvasGroup == null)
         {
-            playerAnimator = GetComponentInChildren<Animator>();
+            CreateFadeOverlay();
         }
 
-        playerColliders = GetComponentsInChildren<Collider>(true);
-        originalColliderStates = new bool[playerColliders.Length];
-
-        for (int i = 0; i < playerColliders.Length; i++)
+        if (transitionCanvasGroup != null)
         {
-            originalColliderStates[i] = playerColliders[i].enabled;
-        }
-
-        playerRenderers = GetComponentsInChildren<Renderer>(true);
-        originalRendererStates = new bool[playerRenderers.Length];
-
-        for (int i = 0; i < playerRenderers.Length; i++)
-        {
-            originalRendererStates[i] = playerRenderers[i].enabled;
+            transitionCanvasGroup.alpha = 0f;
+            transitionCanvasGroup.interactable = false;
+            transitionCanvasGroup.blocksRaycasts = false;
         }
     }
 
-    public bool TryEnterHide(LockerInteractable locker)
+    // ENTRAR EN LA TAQUILLA
+    public void TryEnterHide(LockerInteractable locker)
     {
-        if (IsHidden || IsTransitioning || locker == null)
-            return false;
+        if (locker == null || IsHidden || IsTransitioning)
+            return;
 
         if (locker.HidePoint == null || locker.ExitPoint == null)
         {
-            Debug.LogError(
-                "Asigna HidePoint y ExitPoint en la taquilla."
-            );
-            return false;
+            Debug.LogError("La taquilla necesita HidePoint y ExitPoint.");
+            return;
         }
 
         if (!locker.TryOccupy(this))
         {
-            Debug.Log("Esta taquilla está ocupada.");
-            return false;
+            Debug.Log("La taquilla ya está ocupada.");
+            return;
         }
 
         currentLocker = locker;
-        hidePoint = locker.HidePoint;
-        exitPoint = locker.ExitPoint;
+
+        StartCoroutine(EnterLockerRoutine());
+    }
+
+    private IEnumerator EnterLockerRoutine()
+    {
+        IsTransitioning = true;
+
+        LockPlayer();
+
+        // Oscurecer pantalla
+        yield return FadeTo(1f);
+
+        // Mantener la pantalla negra
+        yield return new WaitForSecondsRealtime(blackScreenDuration);
+
+        // Colocar al jugador dentro de la taquilla
+        MovePlayerTo(currentLocker.HidePoint);
 
         IsHidden = true;
-        IsTransitioning = true;
 
-        if (playerController != null)
-        {
-            previousControllerEnabled = playerController.enabled;
-            playerController.enabled = false;
-        }
-
-        if (rb != null)
-        {
-            previousKinematic = rb.isKinematic;
-            rb.linearVelocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-            rb.isKinematic = true;
-        }
-
-        SetAnimatorTrigger(playerAnimator, enterHideTrigger);
-        currentLocker.PlayOpenAnimation();
-
-        StartCoroutine(EnterHideRoutine());
-
-        return true;
-    }
-
-    private IEnumerator EnterHideRoutine()
-    {
-        yield return new WaitForSeconds(
-            Mathf.Max(0f, enterAnimationDuration)
-        );
-
-        if (hidePoint != null)
-        {
-            MovePlayerTo(hidePoint);
-        }
-
-        SetPlayerColliders(false);
-        SetPlayerRenderers(false);
-
-        if (currentLocker != null)
-        {
-            currentLocker.PlayCloseAnimation();
-        }
+        // Volver a mostrar la pantalla
+        yield return FadeTo(0f);
 
         IsTransitioning = false;
+
+        Debug.Log("Jugador escondido en la taquilla.");
     }
 
+    // SALIR DE LA TAQUILLA
     public void TryExitHide()
     {
-        if (!IsHidden || IsTransitioning)
+        if (!IsHidden || IsTransitioning || currentLocker == null)
             return;
 
-        IsTransitioning = true;
-        StartCoroutine(ExitHideRoutine());
+        StartCoroutine(ExitLockerRoutine());
     }
 
-    private IEnumerator ExitHideRoutine()
+    private IEnumerator ExitLockerRoutine()
     {
-        if (currentLocker != null)
+        IsTransitioning = true;
+
+        // Oscurecer pantalla
+        yield return FadeTo(1f);
+
+        // Mantener la pantalla negra
+        yield return new WaitForSecondsRealtime(blackScreenDuration);
+
+        // Colocar al jugador fuera de la taquilla
+        MovePlayerTo(currentLocker.ExitPoint);
+
+        currentLocker.Release(this);
+        currentLocker = null;
+
+        IsHidden = false;
+
+        // Recuperar movimiento
+        UnlockPlayer();
+
+        // Volver a mostrar la pantalla
+        yield return FadeTo(0f);
+
+        IsTransitioning = false;
+
+        Debug.Log("Jugador salió de la taquilla.");
+    }
+
+    // BLOQUEAR AL JUGADOR
+    private void LockPlayer()
+    {
+        if (playerController != null)
         {
-            currentLocker.PlayOpenAnimation();
+            playerController.LockMovement();
         }
-
-        yield return new WaitForSeconds(
-            Mathf.Max(0f, doorOpenDelay)
-        );
-
-        // Mostrar al jugador para reproducir la animación de salida.
-        SetPlayerRenderers(true);
-        SetAnimatorTrigger(playerAnimator, exitHideTrigger);
-
-        yield return new WaitForSeconds(
-            Mathf.Max(0f, exitAnimationDuration)
-        );
-
-        if (exitPoint != null)
-        {
-            MovePlayerTo(exitPoint);
-        }
-
-        SetPlayerColliders(true);
 
         if (rb != null)
         {
+            originalConstraints = rb.constraints;
+
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-            rb.isKinematic = previousKinematic;
+
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+        }
+    }
+
+    // RECUPERAR EL MOVIMIENTO
+    private void UnlockPlayer()
+    {
+        if (rb != null)
+        {
+            rb.constraints = originalConstraints;
+
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
         }
 
         if (playerController != null)
         {
-            playerController.enabled = previousControllerEnabled;
-        }
-
-        if (currentLocker != null)
-        {
-            currentLocker.PlayCloseAnimation();
-            currentLocker.Release(this);
-        }
-
-        currentLocker = null;
-        hidePoint = null;
-        exitPoint = null;
-
-        IsHidden = false;
-        IsTransitioning = false;
-    }
-
-    private void MovePlayerTo(Transform destination)
-    {
-        if (rb != null)
-        {
-            rb.position = destination.position;
-            rb.rotation = destination.rotation;
-        }
-        else
-        {
-            transform.SetPositionAndRotation(
-                destination.position,
-                destination.rotation
-            );
+            playerController.UnlockMovement();
         }
     }
 
-    private void SetPlayerColliders(bool enabledState)
+    // CAMBIAR LA POSICIÓN DEL JUGADOR
+    private void MovePlayerTo(Transform point)
     {
-        for (int i = 0; i < playerColliders.Length; i++)
-        {
-            if (playerColliders[i] != null)
-            {
-                playerColliders[i].enabled = enabledState
-                    ? originalColliderStates[i]
-                    : false;
-            }
-        }
-    }
-
-    private void SetPlayerRenderers(bool visible)
-    {
-        for (int i = 0; i < playerRenderers.Length; i++)
-        {
-            if (playerRenderers[i] != null)
-            {
-                playerRenderers[i].enabled = visible
-                    ? originalRendererStates[i]
-                    : false;
-            }
-        }
-    }
-
-    private void SetAnimatorTrigger(
-        Animator animator,
-        string triggerName)
-    {
-        if (animator == null || string.IsNullOrEmpty(triggerName))
+        if (point == null)
             return;
 
-        foreach (AnimatorControllerParameter parameter
-                 in animator.parameters)
+        transform.SetPositionAndRotation(point.position, point.rotation);
+
+        if (rb != null)
         {
-            if (parameter.name == triggerName &&
-                parameter.type == AnimatorControllerParameterType.Trigger)
-            {
-                animator.ResetTrigger(triggerName);
-                animator.SetTrigger(triggerName);
-                return;
-            }
+            rb.position = point.position;
+            rb.rotation = point.rotation;
         }
 
-        Debug.LogWarning(
-            "No existe el Trigger '" + triggerName +
-            "' en el Animator."
+        Physics.SyncTransforms();
+    }
+
+    // TRANSICIÓN DE PANTALLA
+    private IEnumerator FadeTo(float targetAlpha)
+    {
+        if (transitionCanvasGroup == null)
+            yield break;
+
+        float startAlpha = transitionCanvasGroup.alpha;
+        float elapsed = 0f;
+
+        if (fadeDuration <= 0f)
+        {
+            transitionCanvasGroup.alpha = targetAlpha;
+            yield break;
+        }
+
+        while (elapsed < fadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+
+            float progress = Mathf.Clamp01(elapsed / fadeDuration);
+
+            transitionCanvasGroup.alpha =
+                Mathf.Lerp(startAlpha, targetAlpha, progress);
+
+            yield return null;
+        }
+
+        transitionCanvasGroup.alpha = targetAlpha;
+    }
+
+    // CREAR AUTOMÁTICAMENTE LA PANTALLA NEGRA
+    private void CreateFadeOverlay()
+    {
+        GameObject canvasObject = new GameObject(
+            "LockerTransitionCanvas",
+            typeof(RectTransform),
+            typeof(Canvas),
+            typeof(CanvasScaler),
+            typeof(GraphicRaycaster)
         );
+
+        Canvas canvas = canvasObject.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 32767;
+
+        CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+
+        GameObject panel = new GameObject(
+            "BlackFade",
+            typeof(RectTransform),
+            typeof(CanvasGroup),
+            typeof(Image)
+        );
+
+        panel.transform.SetParent(canvasObject.transform, false);
+
+        RectTransform rect = panel.GetComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+
+        Image image = panel.GetComponent<Image>();
+        image.color = Color.black;
+        image.raycastTarget = false;
+
+        transitionCanvasGroup = panel.GetComponent<CanvasGroup>();
+        transitionCanvasGroup.alpha = 0f;
+        transitionCanvasGroup.interactable = false;
+        transitionCanvasGroup.blocksRaycasts = false;
+    }
+
+    private void OnDestroy()
+    {
+        if (currentLocker != null)
+        {
+            currentLocker.Release(this);
+        }
     }
 }

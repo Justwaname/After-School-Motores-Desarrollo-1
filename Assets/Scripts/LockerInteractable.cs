@@ -18,14 +18,11 @@ public class LockerInteractable : InteractableObject
 
     public override void Interact()
     {
-        PlayerHideController player =
-            FindObjectOfType<PlayerHideController>();
+        PlayerHideController player = Object.FindFirstObjectByType<PlayerHideController>();
 
         if (player == null)
         {
-            Debug.LogError(
-                "No se encontró PlayerHideController en el jugador."
-            );
+            Debug.LogError("No se encontró PlayerHideController en el jugador.");
             return;
         }
 
@@ -51,51 +48,27 @@ public class LockerInteractable : InteractableObject
 
     public void PlayOpenAnimation()
     {
-        PlaySFX(HorrorSFXEvent.LockerOpen);
         SetAnimatorTrigger(openTrigger);
     }
 
     public void PlayCloseAnimation()
     {
-        PlaySFX(HorrorSFXEvent.LockerClose);
         SetAnimatorTrigger(closeTrigger);
-    }
-
-    private void PlaySFX(HorrorSFXEvent eventType)
-    {
-        if (HorrorSFXManager.Instance != null)
-        {
-            HorrorSFXManager.Instance.PlaySFX(
-                eventType,
-                transform.position
-            );
-        }
     }
 
     private void SetAnimatorTrigger(string triggerName)
     {
-        if (lockerAnimator == null ||
-            string.IsNullOrEmpty(triggerName))
-        {
-            return;
-        }
+        if (lockerAnimator == null || string.IsNullOrEmpty(triggerName)) return;
 
-        foreach (AnimatorControllerParameter parameter
-                 in lockerAnimator.parameters)
+        foreach (AnimatorControllerParameter parameter in lockerAnimator.parameters)
         {
-            if (parameter.name == triggerName &&
-                parameter.type == AnimatorControllerParameterType.Trigger)
+            if (parameter.name == triggerName && parameter.type == AnimatorControllerParameterType.Trigger)
             {
                 lockerAnimator.ResetTrigger(triggerName);
                 lockerAnimator.SetTrigger(triggerName);
                 return;
             }
         }
-
-        Debug.LogWarning(
-            "No existe el Trigger '" + triggerName +
-            "' en el Animator de la taquilla."
-        );
     }
 
     public override string GetInteractText()

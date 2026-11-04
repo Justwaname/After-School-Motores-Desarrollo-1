@@ -12,7 +12,7 @@ public class WinZone : MonoBehaviour
         {
             if (winText != null)
             {
-                winText.text = "YOU ESCAPED THANKS FOR PLAYING!"; 
+                winText.text = "¡ESCAPASTE, GRACIAS POR JUGAR!"; 
                 winText.gameObject.SetActive(true);
             }
 

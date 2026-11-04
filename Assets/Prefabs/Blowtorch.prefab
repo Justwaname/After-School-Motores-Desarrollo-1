@@ -126,5 +126,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyItem
   itemID: Pieza1
-  itemName: Pieza
+  itemName: Soplete
   itemData: {fileID: 11400000, guid: 25240828bae936f41832e42f2d507aa2, type: 2}

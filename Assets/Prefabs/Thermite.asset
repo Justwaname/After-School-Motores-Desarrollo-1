@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Thermite
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: Thermite
-  icon: {fileID: 21300000, guid: 9a98f6792dcfcdd4daf9f50b19bcac6f, type: 3}
+  icon: {fileID: 21300000, guid: 051bd227b31950a4e98d3646edca7d86, type: 3}

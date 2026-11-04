@@ -83,21 +83,33 @@ public class GameManager : MonoBehaviour
             return false;
 
         // Ahora exigimos tener tanto el ítem combinado como el Blowtorch original
-        bool hasFinalItem = Inventory.Instance.HasItem(finalKeyData);
+        bool hasFinalItem = Inventory.Instance.HasItem(Inventory.Instance.GetFinalItem());
         bool hasBlowtorch = Inventory.Instance.HasItem(Inventory.Instance.GetBlowtorch());
 
         return hasFinalItem && hasBlowtorch;
     }
 
+    public bool WillEscape()
+    {
+        if (Inventory.Instance == null)
+            return false;
+
+        // Comprobamos si tiene cada uno de los ítems
+        bool hasMagnesiumRibbon = Inventory.Instance.HasItem(Inventory.Instance.GetMagnesiumRibbon());
+        bool hasThermite = Inventory.Instance.HasItem(Inventory.Instance.GetThermite());
+        bool hasBlowtorch = Inventory.Instance.HasItem(Inventory.Instance.GetBlowtorch());
+
+        return hasMagnesiumRibbon && hasThermite && hasBlowtorch;
+    }
     private void UpdateInteractionText()
     {
         if (notificationText == null)
             return;
 
-        if (CanEscape())
+        if (WillEscape())
         {
             notificationText.text =
-                "You have everything needed to open the door!";
+                "¡Tienes todo para escapar!";
         }
         else
         {
