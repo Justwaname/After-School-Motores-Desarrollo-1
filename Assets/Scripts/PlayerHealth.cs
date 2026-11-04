@@ -215,7 +215,7 @@ public class PlayerHealth : MonoBehaviour
         if (damageVignetteImage != null)
         {
             Color c = damageVignetteImage.color;
-            c.a = .0f;
+            c.a = 1.0f;
             damageVignetteImage.color = c;
         }
 

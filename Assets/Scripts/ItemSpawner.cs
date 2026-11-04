@@ -1,153 +1,79 @@
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class ItemSpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject[] prefabs;           // Prefabs de los objetos a spawnear
-    [SerializeField] private Transform[] spawnPoints;        // Puntos donde spawnear
-    [SerializeField] private int spawnCount = 3;             // Cuántos spawnear
+    [System.Serializable]
+    public struct SpawnPair
+    {
+        [Tooltip("El punto exacto (Transform) donde aparecerá el objeto.")]
+        public Transform spawnPoint;
+
+        [Tooltip("El objeto específico que se spawnea en este punto.")]
+        public GameObject itemPrefab;
+    }
+
+    [Header("Configuración de Spawns")]
+    [SerializeField] private SpawnPair[] spawnPairs;
+    [SerializeField] private string spawnPointTag = "SpawnPoint"; // Opcional si prefieres buscar por Tag
 
     private void Start()
     {
-        SpawnUniqueItems();
+        SpawnSpecificItems();
     }
 
-    private void SpawnUniqueItems()
+    private void SpawnSpecificItems()
     {
-        if (prefabs == null || prefabs.Length == 0 ||
-            spawnPoints == null || spawnPoints.Length == 0)
+        if (spawnPairs == null || spawnPairs.Length == 0)
         {
-            Debug.LogError("ItemSpawner: prefabs o spawnPoints no asignados.");
+            Debug.LogError("ItemSpawner: No hay pares de spawn configurados.");
             return;
         }
 
-        int maxPossible = Mathf.Min(prefabs.Length, spawnPoints.Length);
-        int toSpawn = Mathf.Clamp(spawnCount, 1, maxPossible);
-
-        // Copias para barajar sin modificar los originales
-        List<int> prefabIndices = new List<int>();
-        for (int i = 0; i < prefabs.Length; i++) prefabIndices.Add(i);
-        Shuffle(prefabIndices);
-
-        List<int> spawnIndices = new List<int>();
-        for (int i = 0; i < spawnPoints.Length; i++) spawnIndices.Add(i);
-        Shuffle(spawnIndices);
-
-        for (int i = 0; i < toSpawn; i++)
+        foreach (var pair in spawnPairs)
         {
-            GameObject prefab = prefabs[prefabIndices[i]];
-            Transform spawnT = spawnPoints[spawnIndices[i]];
-            if (prefab == null || spawnT == null) continue;
-            Instantiate(prefab, spawnT.position, spawnT.rotation);
+            if (pair.spawnPoint == null)
+            {
+                Debug.LogWarning("ItemSpawner: Hay un SpawnPoint vacío en la lista.");
+                continue;
+            }
+
+            if (pair.itemPrefab == null)
+            {
+                Debug.LogWarning($"ItemSpawner: El punto '{pair.spawnPoint.name}' no tiene un prefab asignado.");
+                continue;
+            }
+
+            // Instanciamos el prefab específico en la posición y rotación del punto asignado
+            Instantiate(pair.itemPrefab, pair.spawnPoint.position, pair.spawnPoint.rotation);
         }
     }
 
-    // Fisher–Yates shuffle
-    private void Shuffle<T>(List<T> list)
-    {
-        for (int i = list.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            T tmp = list[i];
-            list[i] = list[j];
-            list[j] = tmp;
-        }
-    }
-    /*[Header("Configuración")]
-    [SerializeField] private GameObject Thermite;
-    [SerializeField] private GameObject Blowtorch;
-    [SerializeField] private GameObject MagnesiumRibbon;
-    [SerializeField] private string spawnPointTag = "SpawnPoint";
-
-    private void Start()
-    {
-        SpawnItems();
-    }
-
-    private void SpawnItems()
-    {
-
-        GameObject[] spawnObjects =
-            GameObject.FindGameObjectsWithTag(spawnPointTag);
-
-        if (spawnObjects.Length < 3)
-        {
-            Debug.LogWarning(
-                "[ItemSpawner] Necesitas al menos 3 SpawnPoints."
-            );
-
-            return;
-        }
-
-        // Ordenamos los SpawnPoints por nombre
-        Array.Sort(
-            spawnObjects,
-            (a, b) => string.CompareOrdinal(a.name, b.name)
-        );
-
-        // PIEZA 1
-        CrearItem(
-            spawnObjects[0],
-            "Pieza1",
-            "Pieza 1"
-        );
-
-        // PIEZA 2
-        CrearItem(
-            spawnObjects[1],
-            "Pieza2",
-            "Pieza 2"
-        );
-
-        // PIEZA 3
-        CrearItem(
-            spawnObjects[2],
-            "Pieza3",
-            "Pieza 3"
-        );
-    }
-
-    private void CrearItem(
-        GameObject spawnPoint,
-        string itemID,
-        string itemName)
-    {
-        GameObject newItem = Instantiate(
-            keyItemPrefab,
-            spawnPoint.transform.position,
-            spawnPoint.transform.rotation
-        );
-
-        KeyItem keyItem =
-            newItem.GetComponent<KeyItem>();
-
-        if (keyItem != null)
-        {
-            keyItem.SetItemData(itemID, itemName);
-        }
-        else
-        {
-            Debug.LogError(
-                "[ItemSpawner] El prefab no tiene KeyItem."
-            );
-        }
-    }
+    // Gizmos para visualizar los puntos en la escena
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
 
-        GameObject[] spawnObjects =
-            GameObject.FindGameObjectsWithTag(spawnPointTag);
+        // Si usas la lista de pares en el inspector
+        if (spawnPairs != null)
+        {
+            foreach (var pair in spawnPairs)
+            {
+                if (pair.spawnPoint != null)
+                {
+                    Gizmos.DrawSphere(pair.spawnPoint.position, 0.4f);
+                }
+            }
+        }
 
+        // (Opcional) Si también quieres seguir detectando por Tag para los gizmos
+        GameObject[] spawnObjects = GameObject.FindGameObjectsWithTag(spawnPointTag);
         foreach (GameObject spawnPoint in spawnObjects)
         {
             if (spawnPoint != null)
             {
-                Gizmos.DrawSphere(
-                    spawnPoint.transform.position,
-                    0.4f
-                );
+                Gizmos.DrawWireSphere(spawnPoint.transform.position, 0.45f);
             }
         }
-    }*/
+    }
 }
