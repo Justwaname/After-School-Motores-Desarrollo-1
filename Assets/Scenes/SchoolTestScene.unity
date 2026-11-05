@@ -13074,7 +13074,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 0d5c3ecde30dc9143a257ce42c776040, type: 3}
     - {fileID: 8300000, guid: 39180093d32f4f241b12de1e4ced38f8, type: 3}
     - {fileID: 8300000, guid: 9b72c2ca3a013bc4aad74f397a051895, type: 3}
-    volume: 1
+    volume: 0.59
     spatialBlend: 0
     randomizePitch: 1
     pitchRange: {x: 0.95, y: 1.05}
@@ -13101,7 +13101,7 @@ MonoBehaviour:
   - eventType: 3
     clips:
     - {fileID: 8300000, guid: f4db85086de422a49b7bf583a9c43242, type: 3}
-    volume: 1
+    volume: 0.86
     spatialBlend: 1
     randomizePitch: 1
     pitchRange: {x: 0.95, y: 1.05}
@@ -13110,7 +13110,7 @@ MonoBehaviour:
   - eventType: 4
     clips:
     - {fileID: 8300000, guid: 870457d7c986a0a4fa6bcaad32ef523d, type: 3}
-    volume: 1
+    volume: 0.77
     spatialBlend: 1
     randomizePitch: 1
     pitchRange: {x: 0.95, y: 1.05}
@@ -13139,7 +13139,7 @@ MonoBehaviour:
   - eventType: 7
     clips:
     - {fileID: 8300000, guid: 0d0cede3d094f2445b38b0e01f983827, type: 3}
-    volume: 1
+    volume: 0.35
     spatialBlend: 0
     randomizePitch: 1
     pitchRange: {x: 0.95, y: 1.05}
