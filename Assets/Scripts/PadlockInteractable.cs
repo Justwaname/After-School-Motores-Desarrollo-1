@@ -104,6 +104,7 @@ public class PadlockInteractable : InteractableObject
         // 1. Detenemos el brillo / pulso del candado para que deje de parpadear
         StopPulse();
 
+
         // 2. Activamos el desplazamiento de la puerta hacia la izquierda
         if (targetSlideDoor != null)
         {

@@ -14,7 +14,7 @@ public class EnemyIA : MonoBehaviour
     [Header("Animator y Componentes")]
     public Animator ani;
     private NavMeshAgent agent;
-    [SerializeField]MusicManager musicManager;
+    [SerializeField] MusicManager musicManager;
 
     [Header("Jugador")]
     public GameObject target;
@@ -41,6 +41,9 @@ public class EnemyIA : MonoBehaviour
     private PlayerHideController playerHideController;
     private bool wasHiddenLastFrame = false;
 
+    // --- Control de pausa por UI ---
+    private bool isPausedByUI = false;
+
     void Start()
     {
         ani = GetComponentInChildren<Animator>();
@@ -61,6 +64,10 @@ public class EnemyIA : MonoBehaviour
 
     void Update()
     {
+        // Si la UI está abierta, congelamos todo el comportamiento del enemigo
+        if (isPausedByUI)
+            return;
+
         if (target == null)
             return;
 
@@ -96,6 +103,36 @@ public class EnemyIA : MonoBehaviour
         ActualizarPasos();
     }
 
+    // =========================================================================
+    // MÉTODOS PARA PAUSAR / REANUDAR DESDE LA UI (Candado, Notas, etc.)
+    // =========================================================================
+    public void PauseEnemy()
+    {
+        isPausedByUI = true;
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+        }
+
+        if (ani != null)
+        {
+            ani.SetBool("walk", false);
+            ani.SetBool("run", false);
+            ani.SetBool("attack", false);
+        }
+    }
+
+    public void ResumeEnemy()
+    {
+        isPausedByUI = false;
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
+    }
+
     private void DetenerEnemigo()
     {
         if (agent != null && agent.isOnNavMesh)
@@ -114,7 +151,7 @@ public class EnemyIA : MonoBehaviour
 
     public void Comportamiento_Enemigo()
     {
-        if (target == null)
+        if (target == null || isPausedByUI)
             return;
 
         bool jugadorInvisible = (playerHideController != null && playerHideController.IsHidden);
@@ -268,7 +305,6 @@ public class EnemyIA : MonoBehaviour
 
         agent.SetDestination(waypoints[currentWaypointIndex].position);
         currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-
     }
 
     private void AtacarJugador()

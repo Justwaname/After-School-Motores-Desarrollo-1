@@ -104,7 +104,7 @@ public class KeyDoor : InteractableObject
 
         if (HorrorSFXManager.Instance != null)
         {
-            HorrorSFXManager.Instance.PlaySFX(HorrorSFXEvent.ExitDoor, transform.position);
+            HorrorSFXManager.Instance.PlaySFX(HorrorSFXEvent.Door, transform.position);
         }
 
         if (otraPuerta != null && !otraPuerta.puertaAbierta)

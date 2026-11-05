@@ -12,6 +12,7 @@ public enum HorrorSFXEvent
     LockerClose,
     EnemyFootsteps,
     EnemyAttack,
+    Door,
     UINotification
 }
 

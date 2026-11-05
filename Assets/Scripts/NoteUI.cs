@@ -20,14 +20,28 @@ public class NoteUI : MonoBehaviour
         if (contentText != null) contentText.text = content;
 
         notePanel.SetActive(true);
+
+        // CONGELAR ENEMIGO
+        EnemyIA enemy = Object.FindFirstObjectByType<EnemyIA>();
+        if (enemy != null)
+        {
+            enemy.PauseEnemy();
+        }
     }
 
-    // Vincula este método al botón de "Cerrar" o "Salir" de tu UI en el Canvas
     public void CloseNote()
     {
         if (notePanel == null || !notePanel.activeSelf) return;
 
         notePanel.SetActive(false);
+
+        // REANUDAR ENEMIGO
+        EnemyIA enemy = Object.FindFirstObjectByType<EnemyIA>();
+        if (enemy != null)
+        {
+            enemy.ResumeEnemy();
+        }
+
         onNoteClosed?.Invoke();
     }
 }

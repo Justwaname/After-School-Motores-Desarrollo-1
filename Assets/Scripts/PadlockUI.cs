@@ -46,8 +46,23 @@ public class PadlockUI : MonoBehaviour
         if (padlockPanel == null)
             return;
 
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.UINotification,
+                transform.position
+            );
+        }
+
         ClearDisplay();
         padlockPanel.SetActive(true);
+
+        // CONGELAR ENEMIGO
+        EnemyIA enemy = Object.FindFirstObjectByType<EnemyIA>();
+        if (enemy != null)
+        {
+            enemy.PauseEnemy();
+        }
     }
 
     // CERRAR EL TECLADO
@@ -63,6 +78,13 @@ public class PadlockUI : MonoBehaviour
 
         padlockPanel.SetActive(false);
 
+        // REANUDAR ENEMIGO
+        EnemyIA enemy = Object.FindFirstObjectByType<EnemyIA>();
+        if (enemy != null)
+        {
+            enemy.ResumeEnemy();
+        }
+
         onPanelClosed?.Invoke();
         ClearDisplay();
     }
@@ -77,6 +99,14 @@ public class PadlockUI : MonoBehaviour
             number[0] < '0' || number[0] > '9')
             return;
 
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.UINotification,
+                transform.position
+            );
+        }
+
         if (currentInput.Length < maxDigits)
         {
             currentInput += number;
@@ -88,6 +118,14 @@ public class PadlockUI : MonoBehaviour
     public void ClearDisplay()
     {
         CancelInvoke(nameof(ClearDisplay));
+
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.UINotification,
+                transform.position
+            );
+        }
 
         currentInput = "";
         inputLocked = false;
@@ -103,6 +141,14 @@ public class PadlockUI : MonoBehaviour
     {
         if (inputLocked || currentInput.Length != maxDigits)
             return;
+
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.UINotification,
+                transform.position
+            );
+        }
 
         if (Padlock.Instance == null)
         {
