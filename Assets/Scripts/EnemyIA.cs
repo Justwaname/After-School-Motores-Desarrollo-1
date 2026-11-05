@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -13,6 +14,7 @@ public class EnemyIA : MonoBehaviour
     [Header("Animator y Componentes")]
     public Animator ani;
     private NavMeshAgent agent;
+    [SerializeField]MusicManager musicManager;
 
     [Header("Jugador")]
     public GameObject target;
@@ -74,6 +76,12 @@ public class EnemyIA : MonoBehaviour
         {
             isChasingLostTarget = false;
             lossTimer = 0f;
+
+            if (musicManager != null)
+            {
+                musicManager.SetLayerActive(0, false);
+            }
+
             SiguientePuntoPatrulla();
         }
 
@@ -116,6 +124,18 @@ public class EnemyIA : MonoBehaviour
         if (atacando)
             return;
 
+        // Intencificación de música por distancia
+        float distanceToIntensify = 8f; // Distancia a la que la música se intensifica
+        if (distancia <= distanceToIntensify)
+        {
+            musicManager.SetLayerActive(2, true);
+            musicManager.SetLayerActive(4, true);
+        }
+        else
+        {
+            musicManager.SetLayerActive(2, false);
+            musicManager.SetLayerActive(4, false);
+        }
         // 1. ATAQUE (Solo si no está escondido)
         if (!jugadorInvisible && distancia <= distanciaAtaque)
         {
@@ -152,6 +172,7 @@ public class EnemyIA : MonoBehaviour
                 agent.isStopped = false;
                 agent.speed = Mathf.MoveTowards(agent.speed, runSpeed, Time.deltaTime);
                 agent.SetDestination(target.transform.position);
+                musicManager.SetLayerActive(0, true);
             }
 
             if (ani != null)
@@ -188,6 +209,12 @@ public class EnemyIA : MonoBehaviour
             else
             {
                 isChasingLostTarget = false;
+
+                if (musicManager != null)
+                {
+                    musicManager.SetLayerActive(0, false);
+                }
+
                 SiguientePuntoPatrulla();
             }
         }
@@ -241,6 +268,7 @@ public class EnemyIA : MonoBehaviour
 
         agent.SetDestination(waypoints[currentWaypointIndex].position);
         currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
+
     }
 
     private void AtacarJugador()
