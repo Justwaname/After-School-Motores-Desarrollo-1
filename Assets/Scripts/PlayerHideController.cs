@@ -15,6 +15,7 @@ public class PlayerHideController : MonoBehaviour
     private Rigidbody rb;
     private PlayerController playerController;
 
+    // Variable para almacenar las restricciones originales del Rigidbody del jugador
     private RigidbodyConstraints originalConstraints;
 
     public bool IsHidden { get; private set; }
@@ -24,6 +25,12 @@ public class PlayerHideController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         playerController = GetComponent<PlayerController>();
+
+        // Guardamos las constraints originales que tiene el Rigidbody al arrancar la escena
+        if (rb != null)
+        {
+            originalConstraints = rb.constraints;
+        }
 
         if (transitionImage != null)
         {
@@ -71,6 +78,14 @@ public class PlayerHideController : MonoBehaviour
 
         LockPlayer();
 
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.LockerClose,
+                transform.position
+            );
+        }
+
         // Oscurecer pantalla
         yield return FadeTo(1f);
 
@@ -102,6 +117,14 @@ public class PlayerHideController : MonoBehaviour
     private IEnumerator ExitLockerRoutine()
     {
         IsTransitioning = true;
+
+        if (HorrorSFXManager.Instance != null)
+        {
+            HorrorSFXManager.Instance.PlaySFX(
+                HorrorSFXEvent.LockerOpen,
+                transform.position
+            );
+        }
 
         // Oscurecer pantalla
         yield return FadeTo(1f);
@@ -138,12 +161,11 @@ public class PlayerHideController : MonoBehaviour
 
         if (rb != null)
         {
-            originalConstraints = rb.constraints;
-
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
 
-            rb.constraints = RigidbodyConstraints.FreezeAll;
+            // Mientras está escondido congelamos completamente la posición para que no flote ni se desplace
+            rb.constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
         }
     }
 
@@ -152,10 +174,11 @@ public class PlayerHideController : MonoBehaviour
     {
         if (rb != null)
         {
-            rb.constraints = originalConstraints;
-
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
+
+            // Al salir, restauramos exactamente las restricciones originales que tenía al iniciar el juego
+            rb.constraints = originalConstraints;
         }
 
         if (playerController != null)

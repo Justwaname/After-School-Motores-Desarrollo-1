@@ -44,13 +44,6 @@ public class GameManager : MonoBehaviour
 
     public void ShowNotification(string message)
     {
-        if (HorrorSFXManager.Instance != null)
-        {
-            HorrorSFXManager.Instance.PlaySFX(
-                HorrorSFXEvent.UINotification,
-                transform.position
-            );
-        }
 
         if (notificationText == null)
             return;

@@ -10,7 +10,6 @@ public class SlideDoor : MonoBehaviour
 
     private Vector3 closedPosition;
     private Vector3 targetPosition;
-    private bool isSliding = false;
     private bool isOpened = false;
 
     private void Start()
