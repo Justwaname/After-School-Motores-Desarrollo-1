@@ -46,14 +46,6 @@ public class PadlockUI : MonoBehaviour
         if (padlockPanel == null)
             return;
 
-        if (HorrorSFXManager.Instance != null)
-        {
-            HorrorSFXManager.Instance.PlaySFX(
-                HorrorSFXEvent.UINotification,
-                transform.position
-            );
-        }
-
         ClearDisplay();
         padlockPanel.SetActive(true);
 

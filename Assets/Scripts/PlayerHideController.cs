@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class PlayerHideController : MonoBehaviour
@@ -10,6 +11,10 @@ public class PlayerHideController : MonoBehaviour
 
     [SerializeField] private float fadeDuration = 0.4f;
     [SerializeField] private float blackScreenDuration = 1.5f;
+
+    [SerializeField] private AudioMixerSnapshot normalSnapshot;
+    [SerializeField] private AudioMixerSnapshot hiddenSnapshot;
+    [SerializeField] private float audioTransitionTime = 0.5f; // Tiempo que tarda en cambiar el audio
 
     private LockerInteractable currentLocker;
     private Rigidbody rb;
@@ -74,6 +79,12 @@ public class PlayerHideController : MonoBehaviour
 
     private IEnumerator EnterLockerRoutine()
     {
+
+        if (hiddenSnapshot != null)
+        {
+            hiddenSnapshot.TransitionTo(audioTransitionTime);
+        }
+
         IsTransitioning = true;
 
         LockPlayer();
@@ -116,6 +127,12 @@ public class PlayerHideController : MonoBehaviour
 
     private IEnumerator ExitLockerRoutine()
     {
+
+        if (normalSnapshot != null)
+        {
+            normalSnapshot.TransitionTo(audioTransitionTime);
+        }
+
         IsTransitioning = true;
 
         if (HorrorSFXManager.Instance != null)
