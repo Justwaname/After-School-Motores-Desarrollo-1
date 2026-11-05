@@ -12,6 +12,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int itemsToEscape = 3;
     [SerializeField] private int itemsCollected;
 
+    [Header("Debug / Editor Cheats")]
+    [Tooltip("Activa esto en el Inspector para simular que ya tienes todo listo para escapar.")]
+    [SerializeField] private bool forceCanEscape = false;
+
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI notificationText;
     [SerializeField] private float textDisplayDuration = 3f;
@@ -79,10 +83,14 @@ public class GameManager : MonoBehaviour
 
     public bool CanEscape()
     {
+        // Si el truco del editor está activado, devolvemos true directamente
+        if (forceCanEscape)
+            return true;
+
         if (Inventory.Instance == null)
             return false;
 
-        // Ahora exigimos tener tanto el ítem combinado como el Blowtorch original
+        // Exigimos tener tanto el ítem combinado como el Blowtorch original
         bool hasFinalItem = Inventory.Instance.HasItem(Inventory.Instance.GetFinalItem());
         bool hasBlowtorch = Inventory.Instance.HasItem(Inventory.Instance.GetBlowtorch());
 
@@ -91,6 +99,9 @@ public class GameManager : MonoBehaviour
 
     public bool WillEscape()
     {
+        if (forceCanEscape)
+            return true;
+
         if (Inventory.Instance == null)
             return false;
 
@@ -101,12 +112,13 @@ public class GameManager : MonoBehaviour
 
         return hasMagnesiumRibbon && hasThermite && hasBlowtorch;
     }
+
     private void UpdateInteractionText()
     {
         if (notificationText == null)
             return;
 
-        if (WillEscape())
+        if (WillEscape() || forceCanEscape)
         {
             notificationText.text =
                 "¡Tienes todo para escapar!";
@@ -140,5 +152,13 @@ public class GameManager : MonoBehaviour
         }
 
         hideTextCoroutine = null;
+    }
+
+    // --- OPCIONAL: ACCIÓN RÁPIDA DESDE EL INSPECTOR ---
+    [ContextMenu("Forzar Escape Disponible")]
+    private void DebugForceEscape()
+    {
+        forceCanEscape = !forceCanEscape;
+        Debug.Log($"[GameManager] Force Can Escape: {forceCanEscape}");
     }
 }

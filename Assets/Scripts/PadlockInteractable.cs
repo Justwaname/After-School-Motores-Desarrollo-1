@@ -5,6 +5,10 @@ public class PadlockInteractable : InteractableObject
     [Header("Interfaz del candado")]
     [SerializeField] private PadlockUI padlockUI;
 
+    [Header("Puerta deslizante asociada")]
+    [Tooltip("Arrastra aquí la puerta no interactuable que se abrirá al resolver el candado.")]
+    [SerializeField] private SlideDoor targetSlideDoor;
+
     private PlayerController playerController;
     private SphereCastInteractor sphereInteractor;
 
@@ -14,16 +18,19 @@ public class PadlockInteractable : InteractableObject
     private CursorLockMode previousCursorLockState;
 
     private bool panelAbierto = false;
+    private bool isOpen = false;
 
-    // IMPORTANTE: Sobrescribimos el Awake pero llamamos a base.Awake() 
-    // para que la clase padre active el pulso o el outline automático.
     protected override void Awake()
     {
-        base.Awake(); // <-- Esto activa la corrutina de brillo/outline heredada
+        base.Awake();
 
         if (padlockUI != null)
         {
+            // Nos suscribimos a cuando se cierra el panel (para restaurar controles/cursor)
             padlockUI.onPanelClosed.AddListener(OnPanelClosed);
+
+            // Nos suscribimos al evento de éxito del candado para abrir la puerta automáticamente
+            padlockUI.onAccessGranted.AddListener(OnAccessGranted);
         }
     }
 
@@ -32,12 +39,13 @@ public class PadlockInteractable : InteractableObject
         if (padlockUI != null)
         {
             padlockUI.onPanelClosed.RemoveListener(OnPanelClosed);
+            padlockUI.onAccessGranted.RemoveListener(OnAccessGranted);
         }
     }
 
     public override void Interact()
     {
-        if (panelAbierto)
+        if (isOpen || panelAbierto)
             return;
 
         if (padlockUI == null)
@@ -84,7 +92,28 @@ public class PadlockInteractable : InteractableObject
         panelAbierto = true;
         padlockUI.OpenPanel();
 
-        Debug.Log("Candado numérico abierto.");
+        Debug.Log("Panel de candado numérico abierto.");
+    }
+
+    // Este método se ejecuta automáticamente cuando el usuario acierta el código (gracias a onAccessGranted)
+    private void OnAccessGranted()
+    {
+        if (isOpen) return;
+        isOpen = true;
+
+        // 1. Detenemos el brillo / pulso del candado para que deje de parpadear
+        StopPulse();
+
+        // 2. Activamos el desplazamiento de la puerta hacia la izquierda
+        if (targetSlideDoor != null)
+        {
+            targetSlideDoor.OpenSlideDoor();
+            Debug.Log("¡Código correcto! La puerta se desplaza hacia la izquierda.");
+        }
+        else
+        {
+            Debug.LogWarning("El PadlockInteractable no tiene asignada una SlideDoor.");
+        }
     }
 
     private void OnPanelClosed()
@@ -107,6 +136,7 @@ public class PadlockInteractable : InteractableObject
 
     public override string GetInteractText()
     {
+        if (isOpen) return "";
         return gameObject.name + " [E] to unlock";
     }
 }

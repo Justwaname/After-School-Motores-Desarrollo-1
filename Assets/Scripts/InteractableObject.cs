@@ -14,6 +14,8 @@ public class InteractableObject : MonoBehaviour
     private MaterialPropertyBlock propBlock;
     private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
 
+    private Coroutine pulseRoutine; // Referencia para poder detener la corrutina
+
     protected virtual void Awake()
     {
         if (targetRenderer == null)
@@ -25,7 +27,7 @@ public class InteractableObject : MonoBehaviour
 
         if (enablePulseEffect && targetRenderer != null)
         {
-            StartCoroutine(PulseEffectRoutine());
+            pulseRoutine = StartCoroutine(PulseEffectRoutine());
         }
     }
 
@@ -65,6 +67,24 @@ public class InteractableObject : MonoBehaviour
                 propBlock.SetColor(EmissionColor, Color.black);
                 targetRenderer.SetPropertyBlock(propBlock);
             }
+        }
+    }
+
+    // Método para detener el brillo y apagar la emisión permanentemente
+    public void StopPulse()
+    {
+        if (pulseRoutine != null)
+        {
+            StopCoroutine(pulseRoutine);
+            pulseRoutine = null;
+        }
+
+        // Apagamos el brillo inmediatamente en el material
+        if (targetRenderer != null)
+        {
+            targetRenderer.GetPropertyBlock(propBlock);
+            propBlock.SetColor(EmissionColor, Color.black);
+            targetRenderer.SetPropertyBlock(propBlock);
         }
     }
 

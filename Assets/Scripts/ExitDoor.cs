@@ -20,7 +20,6 @@ public class ExitDoor : InteractableObject
     {
         rotacionCerrada = transform.localRotation;
 
-        // Si esta puerta invierte la dirección, multiplicamos el ángulo por -1
         float anguloFinal = invertirDireccion ? -anguloApertura : anguloApertura;
 
         rotacionAbierta =
@@ -32,10 +31,12 @@ public class ExitDoor : InteractableObject
     {
         if (puertaAbierta)
         {
-            transform.localRotation = Quaternion.Slerp(
+            // Usamos RotateTowards en lugar de Slerp directo para evitar interpolaciones 
+            // que fuercen matrices de escala extrañas en algunos modelos 3D
+            transform.localRotation = Quaternion.RotateTowards(
                 transform.localRotation,
                 rotacionAbierta,
-                Time.deltaTime * velocidadApertura
+                velocidadApertura * 100f * Time.deltaTime
             );
         }
     }
@@ -70,7 +71,6 @@ public class ExitDoor : InteractableObject
                 Inventory.Instance.RemoveItem(Inventory.Instance.GetBlowtorch());
             }
 
-            // Abrir esta puerta y ordenar a la otra que también se abra (evitando bucles infinitos)
             AbrirPuertaRemota();
         }
         else
@@ -88,14 +88,15 @@ public class ExitDoor : InteractableObject
         }
     }
 
-    // Método público para abrir esta hoja de forma directa (llamado por la otra puerta o al cumplir la condición)
     public void AbrirPuertaRemota()
     {
         if (puertaAbierta) return;
 
         puertaAbierta = true;
 
-        // Si tiene una puerta gemela asignada y todavía no está abierta, la abre también
+        // AQUÍ DETENEMOS EL BRILLO CUANDO SE ABRE
+        StopPulse();
+
         if (otraPuerta != null && !otraPuerta.puertaAbierta)
         {
             otraPuerta.AbrirPuertaRemota();

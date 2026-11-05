@@ -63,7 +63,7 @@ public class SphereCastInteractor : MonoBehaviour
 
             if (interactText != null)
             {
-                interactText.text = "E - Salir de la taquilla";
+                interactText.text = "[E] Salir del casillero";
                 interactText.gameObject.SetActive(true);
             }
 

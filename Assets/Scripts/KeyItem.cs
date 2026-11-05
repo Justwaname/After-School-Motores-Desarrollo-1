@@ -6,12 +6,17 @@ public class KeyItem : InteractableObject
     [SerializeField] private string itemID = "Pieza1";
     [SerializeField] private string itemName = "Pieza";
 
+    [Header("Progresión")]
+    [SerializeField] private bool countsTowardsEscape = true; // Desmarca esto si es una llave de puerta que no debe sumar al contador
+
     public ItemData itemData;
+
     // Configurar el objeto desde ItemSpawner
-    public void SetItemData(string newID, string newName)
+    public void SetItemData(string newID, string newName, bool counts = true)
     {
         itemID = newID;
         itemName = newName;
+        countsTowardsEscape = counts;
         gameObject.name = newName;
     }
 
@@ -41,7 +46,8 @@ public class KeyItem : InteractableObject
 
         Debug.Log("Objeto recogido: " + itemName);
 
-        if (GameManager.Instance != null)
+        // Solo sumará al GameManager si está marcado como objeto de escape
+        if (countsTowardsEscape && GameManager.Instance != null)
         {
             GameManager.Instance.ItemCollected();
         }

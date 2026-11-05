@@ -109,8 +109,8 @@ public class LockerInteractable : InteractableObject
             return "Taquilla ocupada";
 
         if (EstaElEnemigoMuyCercaOPersiguiendo())
-            return "¡El enemigo te vigila, espera a despistarlo!";
+            return "¡CORRE!";
 
-        return "E - Esconderse";
+        return "[E] Esconderse";
     }
 }
