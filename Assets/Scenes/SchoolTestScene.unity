@@ -6560,7 +6560,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: c7cb603fd7e8a8943b8a042edc2e6452, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.65
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -6754,7 +6754,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 56e3fe6738115294c9f0a713965153be, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.4
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -6968,7 +6968,7 @@ MonoBehaviour:
   - {fileID: 566510265}
   - {fileID: 566510264}
   - {fileID: 566510263}
-  fadeDuration: 1
+  fadeDuration: 1.6
 --- !u!224 &571686042 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7349637989572066579, guid: d9bf3f0e3a6f77742b9a174457aaa6b1, type: 3}
