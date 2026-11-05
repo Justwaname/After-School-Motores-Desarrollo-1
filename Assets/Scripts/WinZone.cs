@@ -20,7 +20,7 @@ public class WinZone : MonoBehaviour
 
             if (winText != null)
             {
-                winText.text = "¡ESCAPASTE, GRACIAS POR JUGAR!";
+                winText.text = "¡Escapaste... ???";
                 winText.gameObject.SetActive(true);
             }
 
