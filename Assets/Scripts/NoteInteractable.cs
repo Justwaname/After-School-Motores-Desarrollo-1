@@ -4,8 +4,13 @@ public class NoteInteractable : InteractableObject
 {
     [Header("Contenido de la Nota")]
     [SerializeField] private string noteTitle = "Nota misteriosa";
-    [SerializeField][TextArea(3, 10)] private string noteContent = "Aquí escribe el texto terrorífico o pistas del juego...";
-    [SerializeField] private bool consumeOnRead = false; // Si la nota desaparece al leerse por primera vez
+
+    [Header("Usa {CODE} para mostrar la clave del candado")]
+    [SerializeField]
+    [TextArea(3, 10)]
+    private string noteContent = "El código de seguridad del almacén es: {CODE}";
+
+    [SerializeField] private bool consumeOnRead = false; // Si la nota desaparece al leerse
 
     [Header("Referencias de UI")]
     [SerializeField] private NoteUI noteUI;
@@ -48,6 +53,22 @@ public class NoteInteractable : InteractableObject
             return;
         }
 
+        // Procesamos el contenido para inyectar la clave del Padlock si existe la etiqueta {CODE}
+        string finalContent = noteContent;
+        if (finalContent.Contains("{CODE}"))
+        {
+            if (Padlock.Instance != null && !string.IsNullOrEmpty(Padlock.Instance.generatedCode))
+            {
+                finalContent = finalContent.Replace("{CODE}", Padlock.Instance.generatedCode);
+            }
+            else
+            {
+                finalContent = finalContent.Replace("{CODE}", "????");
+                Debug.LogWarning("Padlock.Instance o generatedCode no están listos todavía.");
+            }
+        }
+
+        // Control del jugador y cursor
         GameObject player = GameObject.Find("Player");
         if (player != null)
         {
@@ -67,7 +88,6 @@ public class NoteInteractable : InteractableObject
             }
         }
 
-        // Guardamos estado del cursor y lo liberamos
         previousCursorVisible = Cursor.visible;
         previousCursorLockState = Cursor.lockState;
 
@@ -75,17 +95,13 @@ public class NoteInteractable : InteractableObject
         Cursor.lockState = CursorLockMode.None;
 
         panelAbierto = true;
-        noteUI.OpenNote(noteTitle, noteContent);
-
-        // Opcional: Detener el brillo para que no parpadee mientras se lee
-        StopPulse();
+        noteUI.OpenNote(noteTitle, finalContent);
 
         Debug.Log("Nota leída: " + noteTitle);
     }
 
     private void OnNoteClosed()
     {
-        // Restauramos los controles del jugador y el cursor
         if (playerController != null)
         {
             playerController.enabled = previousPlayerControllerState;
@@ -101,7 +117,6 @@ public class NoteInteractable : InteractableObject
 
         panelAbierto = false;
 
-        // Si configuraste que la nota desaparezca tras leerse
         if (consumeOnRead)
         {
             Destroy(gameObject);

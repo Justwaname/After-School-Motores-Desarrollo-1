@@ -12,14 +12,6 @@ public class NoteUI : MonoBehaviour
     [Header("Eventos")]
     public UnityEvent onNoteClosed;
 
-    private void Start()
-    {
-        if (notePanel != null)
-        {
-            notePanel.SetActive(false); // Empieza oculto
-        }
-    }
-
     public void OpenNote(string title, string content)
     {
         if (notePanel == null) return;
