@@ -215,11 +215,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        if (gameAudioMixer != null)
+        /*if (gameAudioMixer != null)
         {
             float targetVolume = (inputWalk.sqrMagnitude > 0.01f) ? 0f : -3f;
             gameAudioMixer.SetFloat("Master", targetVolume);
-        }
+        }*/
     }
 
     // =========================================================================
